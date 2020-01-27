@@ -1,0 +1,28 @@
+﻿/* You can add global styles to this file, and also import other style files */
+@import '~@angular/material/theming';
+@import "styles/palette";
+
+html, body {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+@include mat-core();
+$app-theme: mat-dark-theme($primary, $secondary, $warn);
+
+@include angular-material-theme((
+  primary: $primary,
+  accent: $secondary,
+  warn: $warn,
+  is-dark: false,
+  foreground: map-merge($mat-light-theme-foreground, (
+    secondary-text: mat-color($primary, 900)
+  )),
+  background: $mat-light-theme-background,
+));

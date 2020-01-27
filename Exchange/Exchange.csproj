@@ -2,12 +2,60 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authorization.Policy" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.1" />
-    <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.19" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.1" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="3.7.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Client" />
+    <Folder Include="Client\ExchangeClient\src\app\modules" />
+    <Folder Include="Client\ExchangeClient\src\app\modules\auth-module\components" />
+    <Folder Include="Filters" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Client\ExchangeClient\e2e\tsconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DatabaseModel\DatabaseModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\app-routing.module.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\app.component.spec.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\app.component.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\app.module.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\guards\no-auth.guard.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\admin-module\admin-module.module.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\admin-module\services\user.service.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\auth-module\auth-module.module.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\auth-module\services\registration.service.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\auth-module\services\username.validator.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\services\auth.interceptor.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\services\auth.service.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\app\services\guards\user-permissions.guard.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\main.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\polyfills.ts" />
+    <TypeScriptCompile Include="Client\ExchangeClient\src\test.ts" />
   </ItemGroup>
 
 

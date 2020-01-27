@@ -1,0 +1,8 @@
+C:\Users\Raman.Yazvinski\source\repos\Exchange\DatabaseModel\bin\Debug\netcoreapp3.1\DatabaseModel.deps.json
+C:\Users\Raman.Yazvinski\source\repos\Exchange\DatabaseModel\bin\Debug\netcoreapp3.1\DatabaseModel.dll
+C:\Users\Raman.Yazvinski\source\repos\Exchange\DatabaseModel\bin\Debug\netcoreapp3.1\DatabaseModel.pdb
+C:\Users\Raman.Yazvinski\source\repos\Exchange\DatabaseModel\obj\Debug\netcoreapp3.1\DatabaseModel.AssemblyInfoInputs.cache
+C:\Users\Raman.Yazvinski\source\repos\Exchange\DatabaseModel\obj\Debug\netcoreapp3.1\DatabaseModel.AssemblyInfo.cs
+C:\Users\Raman.Yazvinski\source\repos\Exchange\DatabaseModel\obj\Debug\netcoreapp3.1\DatabaseModel.dll
+C:\Users\Raman.Yazvinski\source\repos\Exchange\DatabaseModel\obj\Debug\netcoreapp3.1\DatabaseModel.pdb
+C:\Users\Raman.Yazvinski\source\repos\Exchange\DatabaseModel\obj\Debug\netcoreapp3.1\DatabaseModel.csprojAssemblyReference.cache

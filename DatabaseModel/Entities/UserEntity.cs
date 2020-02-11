@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DatabaseModel.Constants;
+using DatabaseModel.Entities.Currency;
+using DatabaseModel.Entities.Order;
+using DatabaseModel.Entities.Seller;
 
 namespace DatabaseModel.Entities
 {
@@ -9,8 +13,12 @@ namespace DatabaseModel.Entities
         public string PasswordHash { get; set; }
         public string Email { get; set; }
         public Role Role { get; set; }
-        public virtual ICollection<ProductEntity>? Products { get; set; }
-        public virtual ICollection<ValueChangeRequestEntity>? ChangeRequests { get; set; }
+
+        public SellerEntity? Seller { get; set; }
+        public Guid? SellerId { get; set; }
         public virtual ICollection<UserDeviceLoginEntity>? UserDeviceLogins { get; set; }
+
+        public virtual ICollection<OrderEntity>? Orders { get; set; }
+        public virtual ICollection<UserBillModifierEntity>? Discounts { get; set; }
     }
 }

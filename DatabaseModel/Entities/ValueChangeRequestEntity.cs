@@ -1,4 +1,5 @@
 ﻿using System;
+using DatabaseModel.Entities.Seller;
 
 namespace DatabaseModel.Entities
 {
@@ -15,7 +16,7 @@ namespace DatabaseModel.Entities
         public ProductClassAttributeValueEntity AttributeValue { get; set; }
 
         public Guid? SenderId { get; set; }
-        public UserEntity? Sender { get; set; }
+        public SellerEntity? Sender { get; set; }
         public DateTime ResolutionTime { get; set; }
         public DateTime CreationTime { get; set; }
         public RequestStatus Status { get; set; }

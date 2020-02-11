@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
+using DatabaseModel;
 using Exchange.Configuration;
 using Exchange.Constants;
 using Exchange.Services;
-using Exchange.Services.Authentication.Options;
 using Exchange.Utils.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,16 +35,18 @@ namespace Exchange
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(options => { options.UseGeneralRoutePrefix("api"); }).AddJsonOptions(options =>
+            services.AddControllers(options => options.UseGeneralRoutePrefix("api"))
+                .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             services.AddSingleton<JwtSecurityTokenHandler>();
             services.AddSingleton<ErrorMessageService>();
 
-            // services.Configure<JwtOptions>(Configuration.GetSection("Security"));
             services.AddCors(options =>
-                options.AddPolicy("Dev", builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }));
+                options.AddPolicy(AuthenticationConstants.CorsPolicyName, builder => {
+                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                }));
             services.SetJwtAuthenticationAsDefault()
                 .AddJwtAuthorization(Configuration);
             services.AddSwaggerGen(options =>
@@ -82,7 +84,7 @@ namespace Exchange
             });
             services.AddDbContext<ExchangeDbContext>(builder =>
             {
-                builder.UseMySql("server=localhost;database=Exchange;user=root;password=12345678");
+                builder.UseMySql(Configuration["DatabaseConnectionString"]);
             });
         }
 
@@ -95,7 +97,7 @@ namespace Exchange
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("Dev");
+            app.UseCors(AuthenticationConstants.CorsPolicyName);
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -107,7 +109,7 @@ namespace Exchange
             });
             app.UseDefaultFiles();
             app.UseStaticFiles();
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }

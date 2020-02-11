@@ -1,16 +1,24 @@
 ﻿using System;
 using DatabaseModel.Constants;
 using DatabaseModel.Entities;
+using DatabaseModel.Entities.Currency;
 using DatabaseModel.Entities.JoinEntities;
+using DatabaseModel.Entities.Order;
+using DatabaseModel.Entities.Seller;
 using Exchange.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Exchange
+namespace DatabaseModel
 {
     public class ExchangeDbContext : DbContext
     {
         public DbSet<UserEntity> Users { get; set; }
+        public DbSet<SellerEntity> Sellers { get; set; }
+        public DbSet<AddressEntity> Addresses { get; set; }
+        public DbSet<OrderEntity> Orders { get; set; }
+        public DbSet<OrderTransactionEntity> OrderTransactions { get; set; }
+        public DbSet<CurrencyEntity> Currencies { get; set; }
         public DbSet<MeasureUnitEntity> MeasureUnits { get; set; }
         public DbSet<MeasureUnitConversionEntity> MeasureUnitConversions { get; set; }
         public DbSet<ProductEntity> Products { get; set; }
@@ -18,6 +26,8 @@ namespace Exchange
         public DbSet<ProductClassAttributeEntity> ProductClassAttributes { get; set; }
         public DbSet<ProductClassAttributeValueEntity> ProductClassAttributeValues { get; set; }
         public DbSet<ValueChangeRequestEntity> ValueChangeRequests { get; set; }
+        public DbSet<UserBillModifierEntity> UserBillModifiers { get; set; }
+        public DbSet<SellerBillModifierEntity> SellerBillModifiers { get; set; }
         public DbSet<UserDeviceLoginEntity> UserDeviceLogins { get; set; }
 
         protected ExchangeDbContext()
@@ -34,10 +44,6 @@ namespace Exchange
             modelBuilder.Entity<UserEntity>(builder =>
             {
                 builder.HasKey(user => user.Guid);
-                builder.HasMany(user => user.Products)
-                    .WithOne(product => product.Owner)
-                    .HasForeignKey(product => product.UserId)
-                    .IsRequired(false);
                 builder.HasMany(user => user.UserDeviceLogins)
                     .WithOne(login => login.User)
                     .HasForeignKey(login => login.UserId)
@@ -114,7 +120,92 @@ namespace Exchange
                     .WithMany(pc => pc.ProductProductClasses)
                     .HasForeignKey(ppc => ppc.ProductClassId);
             });
-            modelBuilder.Entity<UserDeviceLoginEntity>(builder => builder.HasKey(userDeviceLogin => userDeviceLogin.Guid));
+            modelBuilder.Entity<SellerEntity>(builder =>
+            {
+                builder.HasKey(entity => entity.Guid);
+                builder.HasMany(seller => seller.Products)
+                    .WithOne(product => product.Seller)
+                    .HasForeignKey(product => product.SellerId)
+                    .IsRequired(false);
+                builder.HasOne(entity => entity.Address)
+                    .WithOne()
+                    .HasForeignKey<SellerEntity>(entity => entity.AddressId)
+                    .IsRequired();
+                builder.HasMany(entity => entity.Users)
+                    .WithOne(entity => entity.Seller)
+                    .HasForeignKey(user => user.SellerId);
+                builder.Property(entity => entity.SellerName).IsRequired();
+            });
+            modelBuilder.Entity<OrderEntity>(builder =>
+            {
+                builder.HasKey(entity => entity.Guid);
+                builder.HasOne(entity => entity.Customer)
+                    .WithMany(user => user.Orders)
+                    .HasForeignKey(entity => entity.CustomerId)
+                    .IsRequired();
+                builder.HasOne(entity => entity.Product)
+                    .WithMany(product => product.Orders)
+                    .HasForeignKey(entity => entity.ProductId)
+                    .IsRequired();
+                builder.HasOne(entity => entity.Address)
+                    .WithOne()
+                    .HasForeignKey<OrderEntity>(order => order.AddressId);
+                builder.HasMany(entity => entity.Modifiers)
+                    .WithOne(modifier => modifier.Order)
+                    .HasForeignKey(modifier => modifier.OrderId);
+                builder.Property(entity => entity.Quantity).IsRequired();
+            });
+            modelBuilder.Entity<OrderTransactionEntity>(builder =>
+            {
+                builder.HasKey(entity => entity.Guid);
+                builder.HasOne(entity => entity.Order)
+                    .WithMany(order => order.Transactions)
+                    .HasForeignKey(entity => entity.OrderId);
+                builder.HasOne(entity => entity.Currency)
+                    .WithMany()
+                    .HasForeignKey(entity => entity.CurrencyId);
+            });
+            modelBuilder.Entity<BillModifierEntity>(builder =>
+            {
+                builder.HasKey(entity => entity.Guid);
+                builder.HasDiscriminator();
+            });
+            modelBuilder.Entity<SellerBillModifierEntity>(builder =>
+            {
+                builder.HasOne(entity => entity.Product)
+                    .WithOne(product => product.Discount)
+                    .HasForeignKey<SellerBillModifierEntity>(entity => entity.ProductId);
+                builder.HasOne(entity => entity.Seller)
+                    .WithMany(seller => seller.Discounts)
+                    .HasForeignKey(entity => entity.OwnerId);
+            });
+            modelBuilder.Entity<UserBillModifierEntity>(builder =>
+            {
+                builder.HasOne(entity => entity.User)
+                    .WithMany(seller => seller.Discounts)
+                    .HasForeignKey(entity => entity.OwnerId);
+            });
+            modelBuilder.Entity<BillModifierEntity>(builder =>
+            {
+                builder.HasKey(entity => entity.Guid);
+                builder.HasDiscriminator();
+            });
+            modelBuilder.Entity<CurrencyEntity>(builder =>
+            {
+                builder.HasKey(entity => entity.Guid);
+                builder.HasData(new CurrencyEntity
+                {
+                    Guid = Guid.NewGuid(),
+                    Abbreviation = "USD",
+                    CountryCode = "840",
+                    CurrencySign = "$",
+                    Name = "United States Dollar"
+                });
+            });
+            modelBuilder.Entity<AddressEntity>().HasKey(entity => entity.Guid);
+            modelBuilder.Entity<OrderToBillModifier>().HasKey(entity => new { entity.OrderId, entity.BillModifierId});
+            modelBuilder.Entity<UserDeviceLoginEntity>(builder =>
+                builder.HasKey(userDeviceLogin => userDeviceLogin.Guid));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DatabaseModel;
 using DatabaseModel.Constants;
 using DatabaseModel.Entities;
 using Exchange.Models;

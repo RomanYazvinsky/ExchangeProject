@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DatabaseModel;
 using Exchange.Constants;
 using Exchange.Models;
 using Exchange.Services;

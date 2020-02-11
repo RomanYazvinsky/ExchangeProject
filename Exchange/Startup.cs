@@ -46,7 +46,7 @@ namespace Exchange
             services.AddCors(options =>
                 options.AddPolicy("Dev", builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }));
             services.SetJwtAuthenticationAsDefault()
-                .AddJwtAuthorization(Configuration.GetSection("Security"));
+                .AddJwtAuthorization(Configuration);
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo

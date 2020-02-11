@@ -3,3 +3,4 @@
 *.dll
 /bin
 /obj
+secure-key.json

@@ -26,7 +26,7 @@ namespace Exchange.Configuration
 
         public static AuthenticationBuilder AddJwtAuthorization(
             this AuthenticationBuilder authenticationBuilder,
-            IConfigurationSection configurationSection
+            IConfiguration configurationSection
         )
         {
             var key = configurationSection["SigningKey"];

@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Exchange.Entities
+namespace DatabaseModel.Entities
 {
-    public class UserDeviceLogin: Entity
+    public class UserDeviceLoginEntity: Entity
     {
         public Guid UserId { get; set; }
-        public User User { get; set; }
+        public UserEntity User { get; set; }
         public DateTime ValidUntil { get; set; }
         public string DeviceInfo { get; set; }
     }

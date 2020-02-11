@@ -1,6 +1,6 @@
 ﻿﻿import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import {filter, map, tap} from 'rxjs/operators';
 
 export enum Role {
@@ -16,7 +16,8 @@ export interface UserRegistration {
   email: string;
 }
 
-export interface UserInfo {
+export interface UserDto {
+  id: string;
   username: string;
   email: string;
   role: string;
@@ -25,7 +26,7 @@ export interface UserInfo {
 export interface AuthInfo {
   accessToken: string;
   refreshToken: string;
-  userInfo: UserInfo;
+  userInfo: UserDto;
   serverUtcNow: string;
   accessUtcValidTo: string;
 }
@@ -35,12 +36,15 @@ export class AuthService {
   private static readonly MaxTimeDiffThreshold: number = Date.UTC(1, 1, 1, 1, 5) - Date.UTC(1, 1, 1, 1, 0);
   private _authInfo: AuthInfo | null = null;
   private _isAccessExpired: boolean | null = null;
+  private readonly _authentication$: BehaviorSubject<AuthInfo | null>
+    = new BehaviorSubject<AuthInfo | null>(null);
 
   private get authInfo(): AuthInfo | null {
     if (this._authInfo) {
       return this._authInfo;
     }
     this._authInfo = JSON.parse(localStorage.getItem('authInfo'));
+    this.authentication$.next(this._authInfo);
     return this._authInfo;
   }
 
@@ -52,13 +56,14 @@ export class AuthService {
     return this._isAccessExpired;
   }
 
-  private setAuthInfo(value: AuthInfo): void {
+  private setAuthInfo(value: AuthInfo | null): void {
     this._authInfo = null;
     if (!value) {
       localStorage.removeItem('authInfo');
     } else {
       localStorage.setItem('authInfo', JSON.stringify(value));
     }
+    this.authentication$.next(value);
   }
 
   private setAccessExpired(value: boolean): void {
@@ -81,6 +86,10 @@ export class AuthService {
   constructor(private http: HttpClient) {
   }
 
+  get authentication$():BehaviorSubject<AuthInfo | null>{
+    return this._authentication$;
+  }
+
   getAccessToken(): string | null {
     const authInfo = this.authInfo;
     return authInfo && authInfo.accessToken;
@@ -90,7 +99,7 @@ export class AuthService {
     return !!this.getAccessToken();
   }
 
-  getUserInfo(): UserInfo | null {
+  getUserInfo(): UserDto | null {
     const authInfo = this.authInfo;
     return authInfo && authInfo.userInfo;
   }
@@ -116,6 +125,16 @@ export class AuthService {
       filter(token => !!token),
       tap(token => this.saveTokens(token))
     );
+  }
+
+  logout() {
+    this.http.get<void>('/api/logout',{
+      params: {
+        refreshToken:  this.getRefreshToken()
+      }
+    }).subscribe();
+    this.setAuthInfo(null);
+    this.setAccessExpired(false);
   }
 
   refreshTokens(): Observable<AuthInfo> {

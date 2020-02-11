@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Exchange.Entities;
+using DatabaseModel.Constants;
+using DatabaseModel.Entities;
 using Exchange.Models;
 using Exchange.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +37,7 @@ namespace Exchange.Controllers
             {
                 return BadRequest();
             }
-            await _context.Users.AddAsync(new User
+            await _context.Users.AddAsync(new UserEntity
             {
                 Guid = Guid.NewGuid(),
                 UserName = registrationModel.Username,

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Exchange.Entities
+namespace DatabaseModel.Entities
 {
     public enum RequestStatus
     {
@@ -9,13 +9,13 @@ namespace Exchange.Entities
         Rejected,
     }
 
-    public class ValueChangeRequest : Entity
+    public class ValueChangeRequestEntity : Entity
     {
         public Guid ProductClassAttributeValueId { get; set; }
-        public ProductClassAttributeValue AttributeValue { get; set; }
+        public ProductClassAttributeValueEntity AttributeValue { get; set; }
 
         public Guid? SenderId { get; set; }
-        public User? Sender { get; set; }
+        public UserEntity? Sender { get; set; }
         public DateTime ResolutionTime { get; set; }
         public DateTime CreationTime { get; set; }
         public RequestStatus Status { get; set; }

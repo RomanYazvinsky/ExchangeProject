@@ -25,37 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Client" />
-    <Folder Include="Client\ExchangeClient\src\app\modules" />
-    <Folder Include="Client\ExchangeClient\src\app\modules\auth-module\components" />
     <Folder Include="Filters" />
   </ItemGroup>
 
   <ItemGroup>
-    <_ContentIncludedByDefault Remove="Client\ExchangeClient\e2e\tsconfig.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DatabaseModel\DatabaseModel.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\app-routing.module.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\app.component.spec.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\app.component.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\app.module.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\guards\no-auth.guard.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\admin-module\admin-module.module.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\admin-module\services\user.service.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\auth-module\auth-module.module.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\auth-module\services\registration.service.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\modules\auth-module\services\username.validator.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\services\auth.interceptor.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\services\auth.service.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\app\services\guards\user-permissions.guard.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\main.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\polyfills.ts" />
-    <TypeScriptCompile Include="Client\ExchangeClient\src\test.ts" />
   </ItemGroup>
 
 

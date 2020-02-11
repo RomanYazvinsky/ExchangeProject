@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using System.Text.Json.Serialization;
-using Exchange.Controllers;
+using Exchange.Configuration;
+using Exchange.Constants;
 using Exchange.Services;
+using Exchange.Services.Authentication.Options;
 using Exchange.Utils.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,9 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 
 namespace Exchange
@@ -26,8 +25,6 @@ namespace Exchange
             IdentityModelEventSource.ShowPII = true;
         }
 
-        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -38,39 +35,18 @@ namespace Exchange
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(options =>
-            {
-                options.UseGeneralRoutePrefix("api");
-            }).AddJsonOptions(options =>
+            services.AddControllers(options => { options.UseGeneralRoutePrefix("api"); }).AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             services.AddSingleton<JwtSecurityTokenHandler>();
             services.AddSingleton<ErrorMessageService>();
+
+            // services.Configure<JwtOptions>(Configuration.GetSection("Security"));
             services.AddCors(options =>
                 options.AddPolicy("Dev", builder => { builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); }));
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtAuthHandler.JwtAuthScheme;
-                    options.DefaultChallengeScheme = JwtAuthHandler.JwtAuthScheme;
-                    options.DefaultForbidScheme = JwtAuthHandler.JwtAuthScheme;
-                    options.DefaultSignInScheme = JwtAuthHandler.JwtAuthScheme;
-                    options.DefaultSignOutScheme = JwtAuthHandler.JwtAuthScheme;
-                })
-                .AddScheme<JwtOptions, JwtAuthHandler>(JwtAuthHandler.JwtAuthScheme, a =>
-                {
-                    a.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(Encoding.ASCII.GetBytes("01234567012345670123456701234567")),
-                        ValidateAudience = true,
-                        ValidAudience = "ExchangeApp",
-                        ValidateIssuer = true,
-                        ValidIssuer = "Exchange",
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
+            services.SetJwtAuthenticationAsDefault()
+                .AddJwtAuthorization(Configuration.GetSection("Security"));
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
@@ -79,12 +55,12 @@ namespace Exchange
                 });
                 var openApiSecurityScheme = new OpenApiSecurityScheme
                 {
-                    Name = "Authorization",
+                    Name = HeaderNames.Authorization,
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
+                    Scheme = AuthenticationConstants.AuthenticationHeader
                 };
-                options.AddSecurityDefinition("Bearer", openApiSecurityScheme);
+                options.AddSecurityDefinition(AuthenticationConstants.AuthenticationHeader, openApiSecurityScheme);
                 var openApiSecurityRequirement = new OpenApiSecurityRequirement
                 {
                     {
@@ -93,10 +69,10 @@ namespace Exchange
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
+                                Id = AuthenticationConstants.AuthenticationHeader
                             },
-                            Scheme = "oauth2",
-                            Name = "Bearer",
+                            Scheme = AuthenticationConstants.OAuth2AuthenticationScheme,
+                            Name = AuthenticationConstants.AuthenticationHeader,
                             In = ParameterLocation.Header,
                         },
                         new List<string>()
@@ -105,9 +81,9 @@ namespace Exchange
                 options.AddSecurityRequirement(openApiSecurityRequirement);
             });
             services.AddDbContext<ExchangeDbContext>(builder =>
-                {
-                    builder.UseMySql("server=localhost;database=Exchange;user=root;password=12345678");
-                });
+            {
+                builder.UseMySql("server=localhost;database=Exchange;user=root;password=12345678");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

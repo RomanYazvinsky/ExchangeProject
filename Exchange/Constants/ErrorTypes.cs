@@ -6,5 +6,6 @@
         DeviceAuthRemoved,
         InvalidToken,
         ExpiredToken,
+        InvalidParameters
     }
 }

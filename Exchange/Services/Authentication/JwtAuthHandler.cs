@@ -4,18 +4,18 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Exchange.Constants;
+using Exchange.Services.Authentication.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 
-namespace Exchange.Controllers
+namespace Exchange.Services.Authentication
 {
     public class JwtAuthHandler : AuthenticationHandler<JwtOptions>
     {
         private readonly JwtSecurityTokenHandler _tokenHandler;
-        public const string JwtAuthScheme = "Jwt";
-        public const string Bearer = "Bearer ";
 
         public JwtAuthHandler(IOptionsMonitor<JwtOptions> options, ILoggerFactory logger, UrlEncoder encoder,
             ISystemClock clock, JwtSecurityTokenHandler tokenHandler)
@@ -31,14 +31,16 @@ namespace Exchange.Controllers
                 return AuthenticateResult.Fail("Not configured");
             }
 
-            var authHeader = Request.Headers["Authorization"];
-            var jwtBearerHeader = authHeader.FirstOrDefault(s => s != null && s.StartsWith(Bearer));
+            var authHeader = Request.Headers[HeaderNames.Authorization];
+            var jwtBearerHeader = authHeader.FirstOrDefault(s =>
+                s?.StartsWith(AuthenticationConstants.AuthenticationHeader)
+                ?? false);
             if (string.IsNullOrWhiteSpace(jwtBearerHeader))
             {
                 return AuthenticateResult.NoResult();
             }
 
-            var token = jwtBearerHeader.Substring(Bearer.Length).Trim();
+            var token = jwtBearerHeader.Substring(AuthenticationConstants.AuthenticationHeader.Length).Trim();
             if (string.IsNullOrWhiteSpace(token))
             {
                 return AuthenticateResult.NoResult();
@@ -49,8 +51,10 @@ namespace Exchange.Controllers
                 var tokenValidationResult =
                     _tokenHandler.ValidateToken(token, Options.TokenValidationParameters.Clone(), out _);
                 var claimsIdentity = tokenValidationResult;
-                var authenticationTicket = new AuthenticationTicket(new ClaimsPrincipal(claimsIdentity),
-                    JwtAuthScheme);
+                var authenticationTicket = new AuthenticationTicket(
+                    new ClaimsPrincipal(claimsIdentity),
+                    AuthenticationConstants.JwtAuthenticationScheme
+                );
                 return AuthenticateResult.Success(authenticationTicket);
             }
             catch (Exception e)
@@ -62,7 +66,7 @@ namespace Exchange.Controllers
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            Response.Headers["WWW-Authenticate"] = "Bearer";
+            Response.Headers["WWW-Authenticate"] = AuthenticationConstants.AuthenticationHeader;
             return base.HandleChallengeAsync(properties);
         }
     }

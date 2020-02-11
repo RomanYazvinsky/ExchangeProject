@@ -5,17 +5,19 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using DatabaseModel.Entities;
 using Exchange.Constants;
-using Exchange.Entities;
 using Exchange.Models;
 using Exchange.Services;
+using Exchange.Services.Authentication;
+using Exchange.Services.Authentication.Options;
 using Exchange.Utils;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 
 namespace Exchange.Controllers
 {
@@ -46,9 +48,9 @@ namespace Exchange.Controllers
             return _context.Users.AnyAsync(user => user.UserName.Equals(username));
         }
 
-        [HttpGet("refreshToken")]
-        [AllowAnonymous]
-        public async Task<AuthInfoModel> RefreshToken(string refreshToken)
+        [HttpGet("logout")]
+        [Authorize]
+        public async Task Logout(string refreshToken)
         {
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
@@ -59,8 +61,38 @@ namespace Exchange.Controllers
             {
                 var claimsPrincipal =
                     _handler.ValidateToken(refreshToken,
-                        _monitor.Get(JwtAuthHandler.JwtAuthScheme).TokenValidationParameters.Clone(), out _);
-                var userIdClaim = claimsPrincipal.Claims.First(claim => claim.Type.Equals("UserId"));
+                        _monitor.Get(AuthenticationConstants.JwtAuthenticationScheme).TokenValidationParameters.Clone(), out _);
+                var deviceLoginId = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type.Equals("DeviceLoginId"));
+                if (deviceLoginId == null)
+                {
+                    throw _errorMessageService.BuildError(ErrorTypes.InvalidToken);
+                }
+
+                var deviceLogin = await _context.UserDeviceLogins.FindAsync(Guid.Parse(deviceLoginId.Value));
+                _context.UserDeviceLogins.Remove(deviceLogin);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        [HttpGet("refreshToken")]
+        [AllowAnonymous]
+        public async Task<AuthDto> RefreshToken(string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw _errorMessageService.BuildError(ErrorTypes.InvalidToken);
+            }
+
+            try
+            {
+                var claimsPrincipal =
+                    _handler.ValidateToken(refreshToken,
+                        _monitor.Get(AuthenticationConstants.JwtAuthenticationScheme).TokenValidationParameters.Clone(), out _);
+                var userIdClaim = Request.HttpContext.User.Claims.First(claim => claim.Type.Equals("UserId"));
                 var deviceLoginIdClaim = claimsPrincipal.Claims.First(claim => claim.Type.Equals("DeviceLoginId"));
                 var guid = Guid.Parse(userIdClaim.Value);
                 var user = await _context.Users
@@ -77,7 +109,7 @@ namespace Exchange.Controllers
                     user,
                     GenerateAccessUserClaims(user),
                     refreshClaims,
-                    DateTime.UtcNow.AddMinutes(1),
+                    DateTime.UtcNow.AddMinutes(10),
                     refreshExpiration
                 );
             }
@@ -93,7 +125,7 @@ namespace Exchange.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<AuthInfoModel> Login(UserLoginModel userLoginModel)
+        public async Task<AuthDto> Login(UserLoginModel userLoginModel)
         {
             var user = await _context.Users
                 .Include(u => u.UserDeviceLogins)
@@ -121,22 +153,22 @@ namespace Exchange.Controllers
                 user,
                 GenerateAccessUserClaims(user),
                 refreshClaims,
-                DateTime.UtcNow.AddMinutes(1),
+                DateTime.UtcNow.AddMinutes(10),
                 refreshExpiration
-                );
+            );
         }
 
 
-        private Claim[] GenerateAccessUserClaims(User user)
+        private Claim[] GenerateAccessUserClaims(UserEntity user)
         {
             var nameClaim = new Claim(ClaimTypes.NameIdentifier, user.Guid.ToString());
             var roleClaim = new Claim(ClaimTypes.Role, user.Role.ToString());
-            var authClaim = new Claim(ClaimTypes.AuthenticationMethod, JwtAuthHandler.JwtAuthScheme);
+            var authClaim = new Claim(ClaimTypes.AuthenticationMethod, AuthenticationConstants.JwtAuthenticationScheme);
             return new[] {nameClaim, roleClaim, authClaim};
         }
 
         private async Task<IEnumerable<Claim>?> GenerateRefreshUserClaim(
-            User user,
+            UserEntity user,
             DateTime expires,
             Claim previousRefreshTokenClaim = null
         )
@@ -154,62 +186,59 @@ namespace Exchange.Controllers
                 await _context.SaveChangesAsync();
                 return new[]
                 {
-                    new Claim("UserId", user.Guid.ToString()),
                     new Claim("DeviceLoginId", deviceLogin.Guid.ToString()),
                 };
             }
 
-            var userDeviceLogin = new UserDeviceLogin
+            var userDeviceLogin = new UserDeviceLoginEntity
             {
                 User = user,
                 ValidUntil = expires,
-                DeviceInfo = Request.Headers["User-Agent"]
+                DeviceInfo = Request.Headers[HeaderNames.UserAgent]
             };
             await _context.UserDeviceLogins.AddAsync(userDeviceLogin);
             await _context.SaveChangesAsync();
             return new[]
             {
-                new Claim("UserId", user.Guid.ToString()),
                 new Claim("DeviceLoginId", userDeviceLogin.Guid.ToString()),
             };
         }
 
-        private AuthInfoModel GenerateTokenPair(
-            User user,
+        private AuthDto GenerateTokenPair(
+            UserEntity user,
             IEnumerable<Claim> userClaims,
             IEnumerable<Claim> refreshClaims,
             DateTime accessExpiration,
             DateTime refreshExpiration
         )
         {
-            var accessToken = new JwtSecurityToken(
-                "Exchange",
-                "ExchangeApp",
-                userClaims,
-                expires: accessExpiration,
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.ASCII.GetBytes("01234567012345670123456701234567")),
-                    SecurityAlgorithms.HmacSha256Signature)
-            );
-            var refreshToken = new JwtSecurityToken(
-                "Exchange",
-                "ExchangeApp",
-                refreshClaims,
-                expires: refreshExpiration,
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.ASCII.GetBytes("01234567012345670123456701234567")),
-                    SecurityAlgorithms.HmacSha256Signature)
-            );
-            var accessTokenJson = _handler.WriteToken(accessToken);
-            var refreshTokenJson = _handler.WriteToken(refreshToken);
-            return new AuthInfoModel
+            var accessTokenJson = _handler.WriteToken(BuildSecurityToken(userClaims, accessExpiration));
+            var refreshTokenJson = _handler.WriteToken(BuildSecurityToken(refreshClaims, refreshExpiration));
+            return new AuthDto
             {
                 AccessToken = accessTokenJson,
                 RefreshToken = refreshTokenJson,
-                UserInfo = new UserInfoModel(user),
+                UserInfo = new UserDTO(user),
                 ServerUtcNow = DateTime.UtcNow,
                 AccessUtcValidTo = accessExpiration
             };
         }
+
+        private JwtSecurityToken BuildSecurityToken(IEnumerable<Claim> claims, DateTime expires)
+        {
+            var jwtOptions = _monitor.Get(AuthenticationConstants.JwtAuthenticationScheme);
+            var signingKeyBytes = Encoding.ASCII.GetBytes(jwtOptions.SingingKey);
+            var signingCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(signingKeyBytes),
+                SecurityAlgorithms.HmacSha256Signature);
+            return new JwtSecurityToken(
+                jwtOptions.TokenValidationParameters.ValidIssuer,
+                jwtOptions.TokenValidationParameters.ValidAudience,
+                claims,
+                expires: expires,
+                signingCredentials: signingCredentials
+            );
+        }
+
     }
 }

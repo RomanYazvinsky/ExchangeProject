@@ -1,6 +1,7 @@
 ﻿using System;
-using Exchange.Entities;
-using Exchange.Entities.JoinEntities;
+using DatabaseModel.Constants;
+using DatabaseModel.Entities;
+using DatabaseModel.Entities.JoinEntities;
 using Exchange.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -9,15 +10,15 @@ namespace Exchange
 {
     public class ExchangeDbContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<MeasureUnit> MeasureUnits { get; set; }
-        public DbSet<MeasureUnitConversion> MeasureUnitConversions { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<ProductClass> ProductClasses { get; set; }
-        public DbSet<ProductClassAttribute> ProductClassAttributes { get; set; }
-        public DbSet<ProductClassAttributeValue> ProductClassAttributeValues { get; set; }
-        public DbSet<ValueChangeRequest> ValueChangeRequests { get; set; }
-        public DbSet<UserDeviceLogin> UserDeviceLogins { get; set; }
+        public DbSet<UserEntity> Users { get; set; }
+        public DbSet<MeasureUnitEntity> MeasureUnits { get; set; }
+        public DbSet<MeasureUnitConversionEntity> MeasureUnitConversions { get; set; }
+        public DbSet<ProductEntity> Products { get; set; }
+        public DbSet<ProductClassEntity> ProductClasses { get; set; }
+        public DbSet<ProductClassAttributeEntity> ProductClassAttributes { get; set; }
+        public DbSet<ProductClassAttributeValueEntity> ProductClassAttributeValues { get; set; }
+        public DbSet<ValueChangeRequestEntity> ValueChangeRequests { get; set; }
+        public DbSet<UserDeviceLoginEntity> UserDeviceLogins { get; set; }
 
         protected ExchangeDbContext()
         {
@@ -30,7 +31,7 @@ namespace Exchange
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<User>(builder =>
+            modelBuilder.Entity<UserEntity>(builder =>
             {
                 builder.HasKey(user => user.Guid);
                 builder.HasMany(user => user.Products)
@@ -46,7 +47,7 @@ namespace Exchange
                 builder.Property(user => user.Role)
                     .IsRequired()
                     .HasConversion(new EnumToStringConverter<Role>());
-                builder.HasData(new User
+                builder.HasData(new UserEntity
                 {
                     Guid = Guid.NewGuid(),
                     UserName = "admin",
@@ -54,7 +55,7 @@ namespace Exchange
                     Role = Role.Administrator
                 });
             });
-            modelBuilder.Entity<ProductClassAttributeValue>(builder =>
+            modelBuilder.Entity<ProductClassAttributeValueEntity>(builder =>
             {
                 builder.HasKey(value => value.Guid);
                 builder.HasIndex(e => new {e.ProductId, e.ProductClassAttributeId}).IsUnique();
@@ -65,7 +66,7 @@ namespace Exchange
                     .WithMany(classAttribute => classAttribute.AttributeValues)
                     .HasForeignKey(value => value.ProductClassAttributeId);
             });
-            modelBuilder.Entity<ProductClassAttribute>(builder =>
+            modelBuilder.Entity<ProductClassAttributeEntity>(builder =>
             {
                 builder.HasKey(value => value.Guid);
                 builder.HasIndex(e => new {e.Name, e.AssociatedClassId}).IsUnique();
@@ -78,22 +79,22 @@ namespace Exchange
                 builder.Property(attribute => attribute.Mandatory).IsRequired().HasDefaultValue(false);
                 builder.Property(attribute => attribute.ValueDataType).IsRequired().HasDefaultValue(ValueDataType.Text);
             });
-            modelBuilder.Entity<ProductClass>(builder => { builder.HasKey(value => value.Name); });
-            modelBuilder.Entity<Product>(builder => { builder.HasKey(value => value.Guid); });
-            modelBuilder.Entity<MeasureUnit>(builder =>
+            modelBuilder.Entity<ProductClassEntity>(builder => { builder.HasKey(value => value.Name); });
+            modelBuilder.Entity<ProductEntity>(builder => { builder.HasKey(value => value.Guid); });
+            modelBuilder.Entity<MeasureUnitEntity>(builder =>
             {
                 builder.HasKey(value => value.Guid);
                 builder.Property(unit => unit.Name).IsRequired();
                 builder.Property(unit => unit.ShortName).IsRequired();
             });
-            modelBuilder.Entity<MeasureUnitConversion>(builder =>
+            modelBuilder.Entity<MeasureUnitConversionEntity>(builder =>
             {
                 builder.HasKey(value => new {value.FromId, value.ToId});
                 builder.HasOne(value => value.From)
                     .WithMany(unit => unit.Conversions)
                     .HasForeignKey(value => value.FromId);
             });
-            modelBuilder.Entity<ValueChangeRequest>(builder =>
+            modelBuilder.Entity<ValueChangeRequestEntity>(builder =>
             {
                 builder.HasKey(value => value.Guid);
                 builder.HasOne(value => value.Sender)
@@ -103,7 +104,7 @@ namespace Exchange
                     .WithMany(value => value.ChangeRequests)
                     .HasForeignKey(request => request.ProductClassAttributeValueId);
             });
-            modelBuilder.Entity<ProductProductClass>(builder =>
+            modelBuilder.Entity<ProductProductClassEntity>(builder =>
             {
                 builder.HasKey(ppc => new {ppc.ProductId, ppc.ProductClassId});
                 builder.HasOne(ppc => ppc.Product)
@@ -113,7 +114,7 @@ namespace Exchange
                     .WithMany(pc => pc.ProductProductClasses)
                     .HasForeignKey(ppc => ppc.ProductClassId);
             });
-            modelBuilder.Entity<UserDeviceLogin>(builder => builder.HasKey(userDeviceLogin => userDeviceLogin.Guid));
+            modelBuilder.Entity<UserDeviceLoginEntity>(builder => builder.HasKey(userDeviceLogin => userDeviceLogin.Guid));
         }
     }
 }

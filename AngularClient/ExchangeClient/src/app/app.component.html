@@ -1,4 +1,10 @@
 ﻿<div class="app-root-component">
-  <button routerLink="login">Open login page</button>
+  <button *ngIf="!(authService.authentication$ | async); else logoutButton"
+          routerLink="login">
+    Open login page
+  </button>
+  <ng-template #logoutButton>
+    <button (click)="authService.logout()" routerLink="/">Logout</button>
+  </ng-template>
   <router-outlet></router-outlet>
 </div>

@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Exchange.Entities
+namespace DatabaseModel.Entities
 {
-    public class ProductClassAttribute: Entity
+    public class ProductClassAttributeEntity: Entity
     {
         public string Name { get; set; }
         public string AssociatedClassId { get; set; }
-        public ProductClass AssociatedClass { get; set; }
+        public ProductClassEntity AssociatedClass { get; set; }
         public ValueDataType ValueDataType { get; set; }
         public bool Mandatory { get; set; }
-        public virtual ICollection<ProductClassAttributeValue>? AttributeValues { get; set; }
+        public virtual ICollection<ProductClassAttributeValueEntity>? AttributeValues { get; set; }
     }
 
     public enum ValueDataType

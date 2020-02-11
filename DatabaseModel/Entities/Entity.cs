@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Exchange.Entities
+namespace DatabaseModel.Entities
 {
     public abstract class Entity
     {

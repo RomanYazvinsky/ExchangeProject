@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {UserListComponent} from './components/user-list/user-list.component';
 import {UserEditComponent} from './components/user-edit/user-edit.component';
 import {RouterModule} from '@angular/router';
-import {MatTableModule} from '@angular/material';
+import {MatSelectModule, MatTableModule} from '@angular/material';
 import {UserService} from './services/user.service';
 
 
@@ -12,22 +12,23 @@ import {UserService} from './services/user.service';
   providers: [
     UserService
   ],
-  imports: [
-    CommonModule,
-    RouterModule.forChild([{
-      path: '',
-      component: UserListComponent,
-      children: [{
-        path: 'user/:userId',
-        component: UserEditComponent
-      }, {
-        path: 'user',
-        redirectTo: '/'
-      }
-      ]
-    }]),
-    MatTableModule
-  ]
+    imports: [
+        CommonModule,
+        RouterModule.forChild([{
+            path: '',
+            component: UserListComponent,
+            children: [{
+                path: 'user/:userId',
+                component: UserEditComponent
+            }, {
+                path: 'user',
+                redirectTo: '/'
+            }
+            ]
+        }]),
+        MatTableModule,
+        MatSelectModule
+    ]
 })
 export class AdminModuleModule {
 }

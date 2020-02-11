@@ -3,7 +3,8 @@ import {CommonModule} from '@angular/common';
 import {UserListComponent} from './components/user-list/user-list.component';
 import {UserEditComponent} from './components/user-edit/user-edit.component';
 import {RouterModule} from '@angular/router';
-import {MatSelectModule, MatTableModule} from '@angular/material';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
 import {UserService} from './services/user.service';
 
 

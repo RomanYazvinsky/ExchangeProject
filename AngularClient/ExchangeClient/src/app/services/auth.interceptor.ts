@@ -1,52 +1,53 @@
-﻿﻿import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
-import {Injectable} from '@angular/core';
+﻿import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
+import {Injectable, Injector} from '@angular/core';
 import {Observable, throwError} from 'rxjs';
-import {AuthService} from './auth.service';
 import {catchError, switchMap} from 'rxjs/operators';
+import {AuthService} from './auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private authService: AuthService) {
+  constructor(private injector: Injector) {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (!this.authService.isAuthPossible()) {
+    const authService = this.injector.get(AuthService);
+    if (!authService.isAuthPossible()) {
       return next.handle(req);
     }
-    if (this.authService.isTokenExpired()) {
-      return this.refreshExpiredTokenBeforeHandle(req, next);
+    if (authService.isTokenExpired()) {
+      return this.refreshExpiredTokenBeforeHandle(req, next, authService);
     }
-    return this.refreshExpiredTokenIfRequestFailed(req, next);
+    return this.refreshExpiredTokenIfRequestFailed(req, next, authService);
   }
 
-  private buildAuthHeader(): string {
-    return 'Bearer ' + this.authService.getAccessToken();
+  private buildAuthHeader(accessToken: string): string {
+    return 'Bearer ' + accessToken;
   }
 
-  private setAuthHeader(req: HttpRequest<any>): HttpRequest<any> {
+  private setAuthHeader(req: HttpRequest<any>, accessToken: string): HttpRequest<any> {
     return req.clone({
-      headers: req.headers.set('Authorization', this.buildAuthHeader())
+      headers: req.headers.set('Authorization', this.buildAuthHeader(accessToken))
     });
   }
 
-  private refreshExpiredTokenBeforeHandle(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return this.authService.refreshTokens().pipe(
-      switchMap(() => next.handle(this.setAuthHeader(req)))
+  private refreshExpiredTokenBeforeHandle(req: HttpRequest<any>, next: HttpHandler, authService: AuthService): Observable<HttpEvent<any>> {
+    return authService.refreshTokens().pipe(
+      switchMap(auth => next.handle(this.setAuthHeader(req, auth?.accessToken)))
     );
   }
 
-  private refreshExpiredTokenIfRequestFailed(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const httpRequest = this.setAuthHeader(req);
-    return next.handle(httpRequest).pipe(
-      catchError((error) => {
+  private refreshExpiredTokenIfRequestFailed(req: HttpRequest<any>, next: HttpHandler, authService: AuthService): Observable<HttpEvent<any>> {
+    const auth = authService.currentAuthentication;
+    const httpRequest = this.setAuthHeader(req, auth?.accessToken);
+    return next.handle(httpRequest).pipe(catchError((error) => {
         if (error instanceof HttpErrorResponse
           && error.status === 401
-          && this.authService.isAuthPossible()
+          && authService.isAuthPossible()
         ) {
-          return this.authService.refreshTokens().pipe(
+          return authService.refreshTokens().pipe(
             switchMap(() => {
-              return next.handle(this.setAuthHeader(req));
+              return next.handle(this.setAuthHeader(req, auth?.accessToken));
             })
           );
         }

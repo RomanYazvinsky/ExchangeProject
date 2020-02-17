@@ -5,6 +5,7 @@ using DatabaseModel;
 using Exchange.Configuration;
 using Exchange.Constants;
 using Exchange.Services;
+using Exchange.Services.Authentication;
 using Exchange.Utils.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,6 +43,7 @@ namespace Exchange
             });
             services.AddSingleton<JwtSecurityTokenHandler>();
             services.AddSingleton<ErrorMessageService>();
+            services.AddScoped<AuthService>();
 
             services.AddCors(options =>
                 options.AddPolicy(AuthenticationConstants.CorsPolicyName, builder => {

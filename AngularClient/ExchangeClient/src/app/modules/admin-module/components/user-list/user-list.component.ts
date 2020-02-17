@@ -1,6 +1,8 @@
 ﻿import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
-import {AuthService, UserDto} from '../../../../services/auth.service';
+import {Role} from '../../../../models/role';
+import {UserDto} from '../../../../models/user.dto';
+import {AuthService} from '../../../../services/auth.service';
 import {UserService} from '../../services/user.service';
 
 @Component({
@@ -13,9 +15,9 @@ export class UserListComponent implements OnInit {
 
   readonly displayedColumns: (keyof UserDto)[] = ['username', 'email', 'role'];
   users$: Observable<UserDto[]> = this.userService.getUsers();
-  readonly roles = ['Administrator', 'Customer', 'Operator', 'Disabled'];
+  readonly roles: (string)[] = Object.keys(Role).filter(key => typeof Role[key] === 'number');
 
-  readonly currentUser: UserDto | null = this.authService.getUserInfo();
+  readonly currentUser: Observable<UserDto | null> = this.authService.currentUser$;
 
   constructor(private userService: UserService, private authService: AuthService) {
   }

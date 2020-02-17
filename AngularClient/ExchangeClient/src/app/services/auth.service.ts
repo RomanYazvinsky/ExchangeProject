@@ -1,118 +1,79 @@
-﻿﻿import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {filter, map, tap} from 'rxjs/operators';
-
-export enum Role {
-  Administrator,
-  Operator,
-  Customer,
-  Disabled,
-}
-
-export interface UserRegistration {
-  username: string;
-  password: string;
-  email: string;
-}
-
-export interface UserDto {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-}
-
-export interface AuthInfo {
-  accessToken: string;
-  refreshToken: string;
-  userInfo: UserDto;
-  serverUtcNow: string;
-  accessUtcValidTo: string;
-}
+﻿import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, EMPTY, Observable} from 'rxjs';
+import {async} from 'rxjs/internal/scheduler/async';
+import {filter, finalize, first, map, observeOn, switchMap, tap} from 'rxjs/operators';
+import {AuthInfo} from '../models/auth-info';
+import {UserDto} from '../models/user.dto';
 
 @Injectable()
 export class AuthService {
   private static readonly MaxTimeDiffThreshold: number = Date.UTC(1, 1, 1, 1, 5) - Date.UTC(1, 1, 1, 1, 0);
-  private _authInfo: AuthInfo | null = null;
-  private _isAccessExpired: boolean | null = null;
+  private _isCheckAccessExpired: boolean | null = null;
   private readonly _authentication$: BehaviorSubject<AuthInfo | null>
     = new BehaviorSubject<AuthInfo | null>(null);
-
-  private get authInfo(): AuthInfo | null {
-    if (this._authInfo) {
-      return this._authInfo;
-    }
-    this._authInfo = JSON.parse(localStorage.getItem('authInfo'));
-    this.authentication$.next(this._authInfo);
-    return this._authInfo;
-  }
+  private readonly _currentUser$: BehaviorSubject<UserDto | null>
+    = new BehaviorSubject<UserDto | null>(null);
+  private _isAuthBlocked: boolean = false;
 
   private get checkAccessValidationExpiration(): boolean {
-    if (this._isAccessExpired !== null) {
-      return this._isAccessExpired;
+    if (this._isCheckAccessExpired !== null) {
+      return this._isCheckAccessExpired;
     }
-    this._isAccessExpired = localStorage.getItem('checkAccessValidationTime') === 'true';
-    return this._isAccessExpired;
+    this._isCheckAccessExpired = localStorage.getItem('checkAccessValidationTime') === 'true';
+    return this._isCheckAccessExpired;
   }
 
   private setAuthInfo(value: AuthInfo | null): void {
-    this._authInfo = null;
     if (!value) {
       localStorage.removeItem('authInfo');
     } else {
       localStorage.setItem('authInfo', JSON.stringify(value));
     }
-    this.authentication$.next(value);
+    this._authentication$.next(value);
   }
 
-  private setAccessExpired(value: boolean): void {
-    this._isAccessExpired = value;
+  private setCheckAccessExpired(value: boolean): void {
+    this._isCheckAccessExpired = value;
     localStorage.setItem('checkAccessValidationTime', String(value));
   }
 
-  private getRefreshToken(): string | null {
-    const authInfo = this.authInfo;
-    return authInfo && authInfo.refreshToken;
+  private loadAuthInfo() {
+    const authInfo: AuthInfo = JSON.parse(localStorage.getItem('authInfo'));
+    this._authentication$.next(authInfo);
   }
 
-  private saveTokens(token: AuthInfo) {
-    this.setAuthInfo(token);
-    const serverUtcNow: Date = new Date(token.serverUtcNow);
-    this._isAccessExpired = Math.abs(serverUtcNow.getTime() - Date.now()) < AuthService.MaxTimeDiffThreshold;
-    this.setAccessExpired(this._isAccessExpired);
+  private loadCurrentUser(): void {
+    this.authentication$.pipe(
+      observeOn(async), // runs asynchronous
+      first(),
+      switchMap(auth => {
+        return !!auth
+          ? this.http.get<UserDto | null>('/api/currentUser')
+          : EMPTY;
+      })).subscribe(user => this.setCurrentUser(user));
+  }
+
+  private setCurrentUser(user: UserDto | null) {
+    this._currentUser$.next(user);
+  }
+
+  private updateAuth(authInfo: AuthInfo | null) {
+    this.setAuthInfo(authInfo);
+    if (!authInfo) {
+      this.setCheckAccessExpired(false);
+      this.setCurrentUser(null);
+      return;
+    }
+    const serverUtcNow: Date = new Date(authInfo.serverUtcNow);
+    this._isCheckAccessExpired = Math.abs(serverUtcNow.getTime() - Date.now()) < AuthService.MaxTimeDiffThreshold;
+    this.setCheckAccessExpired(this._isCheckAccessExpired);
+    this.setCurrentUser(authInfo.userInfo);
   }
 
   constructor(private http: HttpClient) {
-  }
-
-  get authentication$():BehaviorSubject<AuthInfo | null>{
-    return this._authentication$;
-  }
-
-  getAccessToken(): string | null {
-    const authInfo = this.authInfo;
-    return authInfo && authInfo.accessToken;
-  }
-
-  isAuthPossible(): boolean {
-    return !!this.getAccessToken();
-  }
-
-  getUserInfo(): UserDto | null {
-    const authInfo = this.authInfo;
-    return authInfo && authInfo.userInfo;
-  }
-
-  isTokenExpired(): boolean {
-    const authInfo = this.authInfo;
-    const checkDate = this.checkAccessValidationExpiration;
-    if (!authInfo || !checkDate) {
-      return false;
-    }
-    const currentTime = Date.now();
-    const accessUtcValidTo: Date = new Date(authInfo.accessUtcValidTo);
-    return !authInfo.accessToken || currentTime > accessUtcValidTo.getTime();
+    this.loadAuthInfo();
+    this.loadCurrentUser();
   }
 
   login(username: string, password: string): Observable<AuthInfo> {
@@ -123,31 +84,61 @@ export class AuthService {
     ).pipe(
       map(token => token as AuthInfo),
       filter(token => !!token),
-      tap(token => this.saveTokens(token))
+      tap(token => this.updateAuth(token))
     );
   }
 
-  logout() {
-    this.http.get<void>('/api/logout',{
-      params: {
-        refreshToken:  this.getRefreshToken()
+  logout(): Observable<void> {
+    const auth = this.currentAuthentication;
+    return this.http.get<void>('/api/logout', {
+        params: {
+          refreshToken: auth.refreshToken
+        }
       }
-    }).subscribe();
-    this.setAuthInfo(null);
-    this.setAccessExpired(false);
+    ).pipe(tap(() => {
+      this.setCheckAccessExpired(false);
+      this.setAuthInfo(null);
+      this.setCurrentUser(null);
+    }));
   }
 
   refreshTokens(): Observable<AuthInfo> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      return;
+    const auth = this.currentAuthentication;
+    this._isAuthBlocked = true;
+    return this.http.get<AuthInfo | null>('/api/refreshToken', {
+      params: {refreshToken: auth.refreshToken}
+    }).pipe(
+      filter(token => !!token),
+      tap(token => this.updateAuth(token)),
+      finalize(() => this._isAuthBlocked = false)
+    );
+  }
+
+  get authentication$(): Observable<AuthInfo | null> {
+    return this._authentication$;
+  }
+
+  get currentAuthentication(): AuthInfo | null {
+    return this._authentication$.getValue();
+  }
+
+  get currentUser$(): Observable<UserDto | null> {
+    return this._currentUser$;
+  }
+
+  isTokenExpired(): boolean {
+    const authInfo = this._authentication$.getValue();
+    const checkDate = this.checkAccessValidationExpiration;
+    if (!authInfo || !checkDate) {
+      return false;
     }
-    this.setAuthInfo(null);
-    return this.http.get('/api/refreshToken', {params: {refreshToken}})
-      .pipe(
-        map(token => token as AuthInfo),
-        filter(token => !!token),
-        tap(token => this.saveTokens(token)),
-      );
+    const currentTime = Date.now();
+    const accessUtcValidTo: Date = new Date(authInfo.accessUtcValidTo);
+    return !authInfo.accessToken || currentTime > accessUtcValidTo.getTime();
+  }
+
+  isAuthPossible(): boolean {
+    const authInfo = this._authentication$.getValue();
+    return !!authInfo && !!authInfo.accessToken && !this._isAuthBlocked;
   }
 }

@@ -2,7 +2,7 @@
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {UserRegistration} from '../../../services/auth.service';
+import {UserRegistration} from '../../../models/user-registration';
 
 
 @Injectable()

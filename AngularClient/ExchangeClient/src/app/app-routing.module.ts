@@ -1,7 +1,7 @@
 ﻿import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {NoAuthGuard} from './guards/no-auth.guard';
-import {UserPermissionsGuard} from './services/guards/user-permissions.guard';
+import {NoAuthGuard} from './services/guards/no-auth.guard';
+import {AdministrationZoneGuard} from './services/guards/administration-zone.guard';
 
 
 const routes: Routes = [
@@ -15,7 +15,7 @@ const routes: Routes = [
     path: 'admin',
     loadChildren: () => import('./modules/admin-module/admin.module').then(m => m.AdminModuleModule),
     canActivate: [
-      UserPermissionsGuard
+      AdministrationZoneGuard
     ]
   },
   {

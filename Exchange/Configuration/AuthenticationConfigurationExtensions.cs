@@ -34,7 +34,9 @@ namespace Exchange.Configuration
             return authenticationBuilder.AddScheme<JwtOptions, JwtAuthHandler>(
                 AuthenticationConstants.JwtAuthenticationScheme, a =>
                 {
-                    a.SingingKey = key;
+                    a.SigningKey = key;
+                    a.AccessTokenExpiration = TimeSpan.FromMinutes(1);
+                    a.RefreshTokenExpiration = TimeSpan.FromDays(30);
                     a.TokenValidationParameters = new TokenValidationParameters
                     {
                         IssuerSigningKey = new SymmetricSecurityKey(keyBytes),

@@ -5,6 +5,7 @@ using DatabaseModel;
 using Exchange.Constants;
 using Exchange.Models;
 using Exchange.Services;
+using Exchange.Services.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,24 @@ namespace Exchange.Controllers
     {
         private readonly ExchangeDbContext _context;
         private readonly ErrorMessageService _ems;
+        private readonly AuthService _service;
 
-        public UserController(ExchangeDbContext context, ErrorMessageService ems)
+        public UserController(
+            ExchangeDbContext context,
+            ErrorMessageService ems,
+            AuthService service
+        )
         {
             _context = context;
             _ems = ems;
+            _service = service;
+        }
+
+        [HttpGet("currentUser")]
+        [Authorize]
+        public Task<UserDTO> GetCurrentUserInfo()
+        {
+            return _service.GetCurrentUserInfo(Request);
         }
 
         [HttpGet("users")]
@@ -38,6 +52,7 @@ namespace Exchange.Controllers
             {
                 throw _ems.BuildError(ErrorTypes.InvalidParameters);
             }
+
             var user = await _context.Users.FindAsync(userDto.Id);
             user.Role = userDto.Role;
             await _context.SaveChangesAsync();

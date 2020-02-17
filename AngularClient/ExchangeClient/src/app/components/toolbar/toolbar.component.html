@@ -1,0 +1,13 @@
+<mat-toolbar color="accent">
+  <mat-toolbar-row>
+    <ng-container *ngFor="let button of _toolbarButtons">
+      <button *ngIf="button.isAvailable$ | async"
+              mat-raised-button
+              (click)="button.executeAsync()"
+              class="toolbar-button">
+        {{button.label}}
+      </button>
+    </ng-container>
+  </mat-toolbar-row>
+</mat-toolbar>
+<router-outlet></router-outlet>

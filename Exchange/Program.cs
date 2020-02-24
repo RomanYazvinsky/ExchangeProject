@@ -15,7 +15,7 @@ namespace Exchange
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(builder =>
                 {
-                    builder.AddJsonFile("secure-key.json", optional: false, reloadOnChange: false);
+                    builder.AddJsonFile("security.json", optional: false, reloadOnChange: false);
                 })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }

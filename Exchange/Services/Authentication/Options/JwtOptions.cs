@@ -4,11 +4,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Exchange.Services.Authentication.Options
 {
-    public class SigningKeyModel
-    {
-        public string SigningKey { get; set; }
-    }
-
     public class JwtOptions : AuthenticationSchemeOptions
     {
         public string SigningKey { get; set; }

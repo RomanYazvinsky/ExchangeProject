@@ -3,29 +3,54 @@ using Exchange.Constants;
 
 namespace Exchange.Services
 {
-    public class LocalizedError: Exception
+    public class LocalizedError : Exception
     {
-        public ErrorTypes Type { get; }
-        public override string Message { get; }
-
-        public LocalizedError(ErrorTypes type, string message, Exception? innerException): base(message, innerException)
+        public LocalizedError(string localizedMessage, Exception innerException) : base(
+            innerException == null
+                ? localizedMessage
+                : localizedMessage + Environment.NewLine + innerException.Message,
+            innerException)
         {
-            Type = type;
-            Message = innerException == null ? message : message + Environment.NewLine + innerException.Message;
         }
-
-
+        public LocalizedError(string localizedMessage) : base(localizedMessage)
+        {
+        }
     }
 
     public class ErrorMessageService
     {
-        public string GetErrorMessage(ErrorTypes types)
+        // todo localization service
+        public string GetErrorMessage(string key)
         {
-            return types.ToString();
+            return key;
         }
-        public LocalizedError BuildError(ErrorTypes type, Exception innerException = null)
+
+        public string GetErrorMessage(AuthErrorTypes error)
         {
-            return new LocalizedError(type, GetErrorMessage(type), innerException);
+            return $"[{error}]: {GetErrorMessage($"error.auth.{error}")}";
+        }
+
+        public string GetErrorMessage(ValidationErrorTypes error)
+        {
+            return $"[{error}]: {GetErrorMessage($"error.auth.{error}")}";
+        }
+
+        public string GetErrorMessage(MailConfirmationErrorTypes error)
+        {
+            return $"[{error}]: {GetErrorMessage($"error.auth.{error}")}";
+        }
+
+        public LocalizedError BuildError(string localizationKey, Exception innerException = null)
+        {
+            return new LocalizedError(GetErrorMessage(localizationKey), innerException);
+        }
+        public LocalizedError BuildError(AuthErrorTypes authError, Exception innerException = null)
+        {
+            return BuildError(GetErrorMessage(authError), innerException);
+        }
+        public LocalizedError BuildError(ValidationErrorTypes error, Exception innerException = null)
+        {
+            return BuildError(GetErrorMessage(error), innerException);
         }
     }
 }

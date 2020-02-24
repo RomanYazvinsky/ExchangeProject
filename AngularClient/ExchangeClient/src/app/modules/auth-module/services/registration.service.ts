@@ -1,9 +1,7 @@
-﻿﻿import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+﻿﻿import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
 import {UserRegistration} from '../../../models/user-registration';
-
 
 @Injectable()
 export class RegistrationService {
@@ -13,7 +11,11 @@ export class RegistrationService {
   checkUsername(username: string): Observable<boolean> {
     return this.http.get('/api/username', {params: {username}}) as Observable<boolean>
   }
-  register(user: UserRegistration): Observable<void> {
-    return this.http.post('/api/register', user).pipe(map(() => {}))
+  register(user: {username: string, password: string, email: string}): Observable<void> {
+    return this.http.post<void>('/api/register', {...user, emailConfirmationUrl: 'emailConfirmation'} as UserRegistration)
+  }
+
+  confirmEmail(id: string): Observable<void> {
+    return this.http.post<void>('/api/confirmEmail', {confirmationId: id});
   }
 }

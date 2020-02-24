@@ -1,0 +1,11 @@
+﻿{
+  "SigningKey": "Y}sz!2v1&ghVS#8q!L~yQS$]A*=^rWk6-])CI!x\"}dx*!68lg3op>{R]MHMqx|.",
+  "EmailConfirmation": {
+    "SmtpServer": "smtp.gmail.com",
+    "Port": 465,
+    "Account": "example@mail.com",
+    "Password": "12345678",
+    "UseSsl": true,
+    "UseOAuth": false
+  }
+}

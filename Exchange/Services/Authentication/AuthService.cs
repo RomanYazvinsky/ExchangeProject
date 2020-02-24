@@ -54,7 +54,7 @@ namespace Exchange.Services.Authentication {
         public async Task Logout(string refreshToken) {
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                throw _errorMessageService.BuildError(ErrorTypes.InvalidToken);
+                throw _errorMessageService.BuildError(AuthErrorTypes.InvalidToken);
             }
             try
             {
@@ -64,7 +64,7 @@ namespace Exchange.Services.Authentication {
                 var deviceLoginId = claimsPrincipal.Claims.FirstOrDefault(claim => ClaimDeviceLoginId.Equals(claim.Type));
                 if (deviceLoginId == null)
                 {
-                    throw _errorMessageService.BuildError(ErrorTypes.InvalidToken);
+                    throw _errorMessageService.BuildError(AuthErrorTypes.InvalidToken);
                 }
 
                 var deviceLogin = await _context.UserDeviceLogins.FindAsync(Guid.Parse(deviceLoginId.Value));
@@ -84,12 +84,12 @@ namespace Exchange.Services.Authentication {
                 .FirstOrDefaultAsync(u => u.UserName.Equals(userLoginModel.Username));
             if (user == null)
             {
-                throw _errorMessageService.BuildError(ErrorTypes.UserNotFound);
+                throw _errorMessageService.BuildError(AuthErrorTypes.UserNotFound);
             }
 
             if (!PasswordUtil.PasswordEqual(userLoginModel.Password, user.PasswordHash))
             {
-                throw _errorMessageService.BuildError(ErrorTypes.InvalidPassword);
+                throw _errorMessageService.BuildError(ValidationErrorTypes.InvalidPassword);
             }
 
             var jwtOptions = _monitor.Get(AuthenticationConstants.JwtAuthenticationScheme);
@@ -97,7 +97,7 @@ namespace Exchange.Services.Authentication {
             var refreshClaims = await GenerateRefreshUserClaim(user, refreshExpiration, request);
             if (refreshClaims == null)
             {
-                throw _errorMessageService.BuildError(ErrorTypes.DeviceAuthRemoved);
+                throw _errorMessageService.BuildError(AuthErrorTypes.DeviceAuthRemoved);
             }
 
             return GenerateTokenPair(
@@ -112,7 +112,7 @@ namespace Exchange.Services.Authentication {
         {
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                throw _errorMessageService.BuildError(ErrorTypes.InvalidToken);
+                throw _errorMessageService.BuildError(AuthErrorTypes.InvalidToken);
             }
 
             try
@@ -132,7 +132,7 @@ namespace Exchange.Services.Authentication {
                 var refreshClaims = await GenerateRefreshUserClaim(user, refreshExpiration, request, deviceLoginIdClaim);
                 if (refreshClaims == null)
                 {
-                    throw _errorMessageService.BuildError(ErrorTypes.DeviceAuthRemoved);
+                    throw _errorMessageService.BuildError(AuthErrorTypes.DeviceAuthRemoved);
                 }
 
                 return GenerateTokenPair(
@@ -145,11 +145,11 @@ namespace Exchange.Services.Authentication {
             }
             catch (SecurityTokenExpiredException expired)
             {
-                throw _errorMessageService.BuildError(ErrorTypes.ExpiredToken, expired);
+                throw _errorMessageService.BuildError(AuthErrorTypes.ExpiredToken);
             }
             catch (Exception e)
             {
-                throw _errorMessageService.BuildError(ErrorTypes.InvalidToken, e);
+                throw _errorMessageService.BuildError(AuthErrorTypes.InvalidToken, e);
             }
         }
 

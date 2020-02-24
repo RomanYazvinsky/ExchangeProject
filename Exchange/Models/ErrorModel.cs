@@ -4,13 +4,13 @@ namespace Exchange.Models
 {
     public class ErrorModel
     {
-        public ErrorModel(ErrorTypes errorTypes, string rawMessage)
+        public ErrorModel(AuthErrorTypes authErrorTypes, string rawMessage)
         {
             RawMessage = rawMessage;
-            ErrorTypes = errorTypes;
+            AuthErrorTypes = authErrorTypes;
         }
 
         public string RawMessage { get; set; }
-        public ErrorTypes ErrorTypes { get; set; }
+        public AuthErrorTypes AuthErrorTypes { get; set; }
     }
 }

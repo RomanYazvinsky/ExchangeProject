@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
@@ -6,6 +7,8 @@ using Exchange.Configuration;
 using Exchange.Constants;
 using Exchange.Services;
 using Exchange.Services.Authentication;
+using Exchange.Services.EmailConfirmation;
+using Exchange.Services.EmailConfirmation.Options;
 using Exchange.Utils.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +39,7 @@ namespace Exchange
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<EmailConfirmationOptions>(Configuration.GetSection("EmailConfirmation"));
             services.AddControllers(options => options.UseGeneralRoutePrefix("api"))
                 .AddJsonOptions(options =>
             {
@@ -43,6 +47,8 @@ namespace Exchange
             });
             services.AddSingleton<JwtSecurityTokenHandler>();
             services.AddSingleton<ErrorMessageService>();
+            services.AddSingleton<EmailService>();
+            services.AddScoped<UserRegistrationService>();
             services.AddScoped<AuthService>();
 
             services.AddCors(options =>

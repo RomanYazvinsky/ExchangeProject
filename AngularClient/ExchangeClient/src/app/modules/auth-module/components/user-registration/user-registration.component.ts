@@ -1,6 +1,5 @@
 ﻿import {Component, OnInit} from '@angular/core';
 import {AbstractControlOptions, FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {UserRegistration} from '../../../../models/user-registration';
 import {RegistrationService} from '../../services/registration.service';
 import {UsernameValidator} from '../../services/username.validator';
 
@@ -34,7 +33,7 @@ export class UserRegistrationComponent implements OnInit {
 
   register() {
     const {username, password, email} = this._form.value;
-    this.authService.register({username, password, email} as UserRegistration)
+    this.authService.register({username, password, email})
       .subscribe(() => {});
   }
 }

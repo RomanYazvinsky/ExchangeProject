@@ -10,10 +10,11 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {UserRegistrationComponent} from './components/user-registration/user-registration.component';
 import {AuthFormComponent} from './components/auth-form/auth-form.component';
 import {UsernameValidator} from './services/username.validator';
+import { EmailConfirmationComponent } from './components/email-confirmation/email-confirmation.component'
 
 
 @NgModule({
-  declarations: [LoginComponent, UserRegistrationComponent, AuthFormComponent],
+  declarations: [LoginComponent, UserRegistrationComponent, AuthFormComponent, EmailConfirmationComponent],
   providers: [RegistrationService, UsernameValidator],
   imports: [
     CommonModule,
@@ -33,6 +34,9 @@ import {UsernameValidator} from './services/username.validator';
           }, {
             path: 'register',
             component: UserRegistrationComponent
+          }, {
+            path: 'emailConfirmation/:id',
+            component: EmailConfirmationComponent,
           }
         ]
       },

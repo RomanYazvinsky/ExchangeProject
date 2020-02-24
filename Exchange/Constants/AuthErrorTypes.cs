@@ -1,12 +1,10 @@
 ﻿namespace Exchange.Constants
 {
-    public enum ErrorTypes
+    public enum AuthErrorTypes
     {
         UserNotFound,
-        InvalidPassword,
         DeviceAuthRemoved,
         InvalidToken,
-        ExpiredToken,
-        InvalidParameters
+        ExpiredToken
     }
 }

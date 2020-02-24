@@ -50,7 +50,7 @@ namespace Exchange.Controllers
         {
             if (userDto.Id == default)
             {
-                throw _ems.BuildError(ErrorTypes.InvalidParameters);
+                throw _ems.BuildError(ValidationErrorTypes.InvalidIdentity);
             }
 
             var user = await _context.Users.FindAsync(userDto.Id);

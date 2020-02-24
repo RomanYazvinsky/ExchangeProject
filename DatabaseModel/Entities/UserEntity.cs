@@ -14,6 +14,8 @@ namespace DatabaseModel.Entities
         public string Email { get; set; }
         public Role Role { get; set; }
 
+        public bool IsEmailConfirmed { get; set; }
+
         public SellerEntity? Seller { get; set; }
         public Guid? SellerId { get; set; }
         public virtual ICollection<UserDeviceLoginEntity>? UserDeviceLogins { get; set; }

@@ -1,8 +1,0 @@
-C:\Users\Raman.Yazvinski\source\repos\Exchange\AngularClient\bin\Debug\netcoreapp3.1\AngularClient.deps.json
-C:\Users\Raman.Yazvinski\source\repos\Exchange\AngularClient\bin\Debug\netcoreapp3.1\AngularClient.dll
-C:\Users\Raman.Yazvinski\source\repos\Exchange\AngularClient\bin\Debug\netcoreapp3.1\AngularClient.pdb
-C:\Users\Raman.Yazvinski\source\repos\Exchange\AngularClient\obj\Debug\netcoreapp3.1\AngularClient.csprojAssemblyReference.cache
-C:\Users\Raman.Yazvinski\source\repos\Exchange\AngularClient\obj\Debug\netcoreapp3.1\AngularClient.AssemblyInfoInputs.cache
-C:\Users\Raman.Yazvinski\source\repos\Exchange\AngularClient\obj\Debug\netcoreapp3.1\AngularClient.AssemblyInfo.cs
-C:\Users\Raman.Yazvinski\source\repos\Exchange\AngularClient\obj\Debug\netcoreapp3.1\AngularClient.dll
-C:\Users\Raman.Yazvinski\source\repos\Exchange\AngularClient\obj\Debug\netcoreapp3.1\AngularClient.pdb

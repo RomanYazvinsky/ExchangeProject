@@ -3,11 +3,27 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <Nullable>enable</Nullable>
+        <AssemblyName>Exchange.Data</AssemblyName>
+        <RootNamespace>Exchange.Data</RootNamespace>
+        <GenerateRuntimeConfigurationFiles>True</GenerateRuntimeConfigurationFiles>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.1" />
+      <Compile Remove="Migrations\20200225134444_InitialMigration.cs" />
+      <Compile Remove="Migrations\20200225134444_InitialMigration.Designer.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.2">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Exchange.Common\Exchange.Common.csproj" />
     </ItemGroup>
 
 </Project>

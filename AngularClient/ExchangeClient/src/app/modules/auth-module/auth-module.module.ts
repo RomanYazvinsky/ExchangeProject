@@ -9,13 +9,12 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {UserRegistrationComponent} from './components/user-registration/user-registration.component';
 import {AuthFormComponent} from './components/auth-form/auth-form.component';
-import {UsernameValidator} from './services/username.validator';
 import { EmailConfirmationComponent } from './components/email-confirmation/email-confirmation.component'
 
 
 @NgModule({
   declarations: [LoginComponent, UserRegistrationComponent, AuthFormComponent, EmailConfirmationComponent],
-  providers: [RegistrationService, UsernameValidator],
+  providers: [RegistrationService],
   imports: [
     CommonModule,
     FormsModule,

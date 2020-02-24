@@ -1,7 +1,7 @@
 ﻿using System;
-using DatabaseModel.Entities.Currency;
+using Exchange.Data.Entities.Currency;
 
-namespace DatabaseModel.Entities.Order
+namespace Exchange.Data.Entities.Order
 {
     public enum OrderTransactionType
     {

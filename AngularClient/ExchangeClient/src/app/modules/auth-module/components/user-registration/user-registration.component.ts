@@ -1,7 +1,7 @@
 ﻿import {Component, OnInit} from '@angular/core';
 import {AbstractControlOptions, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Router} from '@angular/router';
 import {RegistrationService} from '../../services/registration.service';
-import {UsernameValidator} from '../../services/username.validator';
 
 @Component({
   selector: 'app-user-registration',
@@ -10,21 +10,28 @@ import {UsernameValidator} from '../../services/username.validator';
 })
 export class UserRegistrationComponent implements OnInit {
 
-
   _form: FormGroup = this.formBuilder.group({
     'username': ['', {
       validators: [Validators.required],
-      asyncValidators: [this.usernameValidator.validate.bind(this.usernameValidator)],
+      asyncValidators: [control => this.authService.checkUsername(control.value)],
       updateOn: 'blur'
     } as AbstractControlOptions
     ],
-    'password': ['', [Validators.required]],
-    'email': ['', [Validators.required, Validators.email]],
+    'password': ['', {
+      validators: [Validators.required],
+      asyncValidators: [control => this.authService.checkPassword(control.value)],
+      updateOn: 'blur'
+    }],
+    'email': ['', {
+      validators: [Validators.required, Validators.email],
+      asyncValidators: [control => this.authService.checkEmail(control.value)],
+      updateOn: 'blur'
+    }],
   });
 
   constructor(private formBuilder: FormBuilder,
               private authService: RegistrationService,
-              private usernameValidator: UsernameValidator,
+              private router: Router
   ) {
   }
 
@@ -34,6 +41,8 @@ export class UserRegistrationComponent implements OnInit {
   register() {
     const {username, password, email} = this._form.value;
     this.authService.register({username, password, email})
-      .subscribe(() => {});
+      .subscribe(() => {
+        this.router.navigate(['login'])
+      });
   }
 }

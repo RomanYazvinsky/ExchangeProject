@@ -14,7 +14,8 @@
   <ng-container [matColumnDef]="'role'">
     <mat-header-cell *matHeaderCellDef>{{'Role'}}</mat-header-cell>
     <mat-cell *matCellDef="let element">
-      <mat-select [(value)]="element.role" [disabled]="element.id === (currentUser | async)?.id" (selectionChange)="saveRole(element)">
+      <mat-select [(value)]="element.role" [disabled]="element.id === (currentUser | async)?.id"
+                  (selectionChange)="saveRole(element)">
         <mat-option *ngFor="let role of roles" [value]="role">
           {{role}}
         </mat-option>
@@ -23,5 +24,6 @@
   </ng-container>
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;" class="selectable-row" [class.selected]="selectedUser?.id === row.id"
+           (click)="selectRow(row)" (dblclick)="openUser(row)"></mat-row>
 </mat-table>

@@ -1,4 +1,5 @@
-﻿namespace DatabaseModel.Entities.Currency
+﻿
+namespace Exchange.Data.Entities.Currency
 {
     public class CurrencyEntity: Entity
     {

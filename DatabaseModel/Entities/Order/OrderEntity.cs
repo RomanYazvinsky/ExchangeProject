@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using DatabaseModel.Entities.Currency;
-using DatabaseModel.Entities.JoinEntities;
+using Exchange.Data.Entities.JoinEntities;
+using Exchange.Data.Entities.User;
 
-namespace DatabaseModel.Entities.Order
+namespace Exchange.Data.Entities.Order
 {
     public enum OrderStatus
     {

@@ -1,33 +1,26 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
-using DatabaseModel;
+using Exchange.Authentication;
+using Exchange.Authentication.Jwt;
+using Exchange.Authentication.Jwt.Impl;
 using Exchange.Configuration;
-using Exchange.Constants;
-using Exchange.Services;
-using Exchange.Services.Authentication;
-using Exchange.Services.EmailConfirmation;
-using Exchange.Services.EmailConfirmation.Options;
-using Exchange.Utils.Extensions;
+using Exchange.Core.Constants;
+using Exchange.Core.Services;
+using Exchange.Core.Services.EmailConfirmation;
+using Exchange.Core.Services.EmailConfirmation.Options;
+using Exchange.Core.Services.ErrorMessages;
+using Exchange.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.Net.Http.Headers;
-using Microsoft.OpenApi.Models;
 
 namespace Exchange
 {
     public class Startup
     {
-        static Startup()
-        {
-            IdentityModelEventSource.ShowPII = true;
-        }
 
         public Startup(IConfiguration configuration)
         {
@@ -36,67 +29,34 @@ namespace Exchange
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<EmailConfirmationOptions>(Configuration.GetSection("EmailConfirmation"));
-            services.AddControllers(options => options.UseGeneralRoutePrefix("api"))
-                .AddJsonOptions(options =>
+            services.Configure<EmailConfirmationOptions>(Configuration.GetSection(ConfigurationConstants.EmailConfirmationSection));
+            var jwtSettings = Configuration.GetSection(ConfigurationConstants.AuthorizationSection);
+            services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
+            services.SetJwtAuthenticationAsDefault().AddJwtAuthorization(jwtSettings);
+            services.AddSingleton<JwtTokenFactory>();
             services.AddSingleton<JwtSecurityTokenHandler>();
             services.AddSingleton<ErrorMessageService>();
             services.AddSingleton<EmailService>();
+            services.AddScoped<CredentialValidationService>();
             services.AddScoped<UserRegistrationService>();
             services.AddScoped<AuthService>();
+            services.AddScoped<UserService>();
 
             services.AddCors(options =>
-                options.AddPolicy(AuthenticationConstants.CorsPolicyName, builder => {
-                    builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                }));
-            services.SetJwtAuthenticationAsDefault()
-                .AddJwtAuthorization(Configuration);
-            services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "My API", Version = "v1"
-                });
-                var openApiSecurityScheme = new OpenApiSecurityScheme
-                {
-                    Name = HeaderNames.Authorization,
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = AuthenticationConstants.AuthenticationHeader
-                };
-                options.AddSecurityDefinition(AuthenticationConstants.AuthenticationHeader, openApiSecurityScheme);
-                var openApiSecurityRequirement = new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = AuthenticationConstants.AuthenticationHeader
-                            },
-                            Scheme = AuthenticationConstants.OAuth2AuthenticationScheme,
-                            Name = AuthenticationConstants.AuthenticationHeader,
-                            In = ParameterLocation.Header,
-                        },
-                        new List<string>()
-                    }
-                };
-                options.AddSecurityRequirement(openApiSecurityRequirement);
-            });
+                options.AddPolicy(AuthenticationConstants.CorsPolicyName,
+                    builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+            services.ConfigureSwagger();
             services.AddDbContext<ExchangeDbContext>(builder =>
             {
-                builder.UseMySql(Configuration["DatabaseConnectionString"]);
+                builder.UseMySql(Configuration[ConfigurationConstants.DatabaseConnectionStringProperty]);
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -109,12 +69,7 @@ namespace Exchange
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Exchange");
-                c.RoutePrefix = string.Empty;
-            });
+            app.UseConfiguredSwagger();
             app.UseDefaultFiles();
             app.UseStaticFiles();
             app.UseEndpoints(endpoints => endpoints.MapControllers());

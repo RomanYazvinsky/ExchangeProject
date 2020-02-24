@@ -1,7 +1,7 @@
 ﻿using System;
-using DatabaseModel.Entities.Seller;
+using Exchange.Data.Entities.Seller;
 
-namespace DatabaseModel.Entities
+namespace Exchange.Data.Entities
 {
     public enum RequestStatus
     {

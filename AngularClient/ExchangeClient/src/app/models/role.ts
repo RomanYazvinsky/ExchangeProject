@@ -2,5 +2,6 @@
     Administrator,
     Operator,
     Customer,
+    Provider,
     Disabled,
 }

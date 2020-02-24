@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DatabaseModel\DatabaseModel.csproj" />
+      <ProjectReference Include="..\Exchange.Authentication\Exchange.Authentication.csproj" />
+      <ProjectReference Include="..\Exchange.Common\Exchange.Common.csproj" />
+      <ProjectReference Include="..\Exchange.Core\Exchange.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    </ItemGroup>
+
+</Project>

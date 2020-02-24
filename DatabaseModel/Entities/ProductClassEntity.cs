@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using DatabaseModel.Entities.JoinEntities;
+using Exchange.Data.Entities.JoinEntities;
 
-namespace DatabaseModel.Entities
+namespace Exchange.Data.Entities
 {
     public class ProductClassEntity
     {

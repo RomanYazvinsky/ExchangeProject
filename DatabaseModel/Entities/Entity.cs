@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace DatabaseModel.Entities
+namespace Exchange.Data.Entities
 {
     public abstract class Entity
     {
-        public Guid Guid { get; set; }
+        public Guid Id { get; set; }
     }
 }

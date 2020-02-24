@@ -11,6 +11,7 @@ import {AppComponent} from './app.component';
 import {ToolbarComponent} from './components/toolbar/toolbar.component';
 import {AuthInterceptor} from './services/auth.interceptor';
 import {AuthService} from './services/auth.service';
+import {AuthGuard} from './services/guards/auth.guard';
 import {NoAuthGuard} from './services/guards/no-auth.guard';
 import {AdministrationZoneGuard} from './services/guards/administration-zone.guard';
 import {PermissionService} from './services/permission.service';
@@ -31,6 +32,7 @@ import {PermissionService} from './services/permission.service';
     MatButtonModule
   ],
   providers: [
+    AuthGuard,
     AuthService,
     NoAuthGuard,
     AdministrationZoneGuard,

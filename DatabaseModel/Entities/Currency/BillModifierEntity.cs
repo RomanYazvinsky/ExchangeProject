@@ -1,7 +1,8 @@
 ﻿using System;
-using DatabaseModel.Entities.Seller;
+using Exchange.Data.Entities.Seller;
+using Exchange.Data.Entities.User;
 
-namespace DatabaseModel.Entities.Currency
+namespace Exchange.Data.Entities.Currency
 {
     public enum ValueType
     {

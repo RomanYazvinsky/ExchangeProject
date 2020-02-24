@@ -1,11 +1,19 @@
 ﻿{
-  "SigningKey": "Y}sz!2v1&ghVS#8q!L~yQS$]A*=^rWk6-])CI!x\"}dx*!68lg3op>{R]MHMqx|.",
+  "JwtAuthorization": {
+    "SigningKey": "Y}sz!2v1&ghVS#8q!L~yQS$]A*=^rWk6-])CI!x\"}dx*!68lg3op>{R]MHMqx|.",
+    "ValidAudience": "https://localhost:44318/",
+    "ValidIssuer": "https://localhost:44318/",
+    "AccessExpirationSeconds": 60,
+    "RefreshExpirationSeconds": 600
+  },
   "EmailConfirmation": {
     "SmtpServer": "smtp.gmail.com",
     "Port": 465,
     "Account": "example@mail.com",
     "Password": "12345678",
     "UseSsl": true,
-    "UseOAuth": false
+    "UseOAuth": false,
+    "ConfirmationUrl": "http://localhost:4200/confirmation",
+    "EmailTemplatePath": "Assets/registration-confirmation-mail-form.html"
   }
 }

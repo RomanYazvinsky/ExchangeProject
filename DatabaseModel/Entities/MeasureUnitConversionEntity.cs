@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DatabaseModel.Entities
+namespace Exchange.Data.Entities
 {
     public class MeasureUnitConversionEntity
     {

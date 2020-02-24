@@ -1,15 +1,16 @@
 ﻿using System;
-using DatabaseModel.Constants;
-using DatabaseModel.Entities;
-using DatabaseModel.Entities.Currency;
-using DatabaseModel.Entities.JoinEntities;
-using DatabaseModel.Entities.Order;
-using DatabaseModel.Entities.Seller;
-using Exchange.Utils;
+using Exchange.Common.Utils;
+using Exchange.Data.Constants;
+using Exchange.Data.Entities;
+using Exchange.Data.Entities.Currency;
+using Exchange.Data.Entities.JoinEntities;
+using Exchange.Data.Entities.Order;
+using Exchange.Data.Entities.Seller;
+using Exchange.Data.Entities.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace DatabaseModel
+namespace Exchange.Data
 {
     public class ExchangeDbContext : DbContext
     {
@@ -28,7 +29,6 @@ namespace DatabaseModel
         public DbSet<ValueChangeRequestEntity> ValueChangeRequests { get; set; }
         public DbSet<UserBillModifierEntity> UserBillModifiers { get; set; }
         public DbSet<SellerBillModifierEntity> SellerBillModifiers { get; set; }
-        public DbSet<UserDeviceLoginEntity> UserDeviceLogins { get; set; }
 
         protected ExchangeDbContext()
         {
@@ -43,27 +43,26 @@ namespace DatabaseModel
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<UserEntity>(builder =>
             {
-                builder.HasKey(user => user.Guid);
-                builder.HasMany(user => user.UserDeviceLogins)
-                    .WithOne(login => login.User)
-                    .HasForeignKey(login => login.UserId)
-                    .IsRequired();
+                builder.HasKey(user => user.Id);
                 builder.Property(user => user.Email).IsRequired(false);
-                builder.HasIndex(user => user.UserName).IsUnique();
+                builder.HasIndex(user => user.Username).IsUnique();
+                builder.HasIndex(user => user.Email).IsUnique();
                 builder.Property(user => user.Role)
                     .IsRequired()
                     .HasConversion(new EnumToStringConverter<Role>());
                 builder.HasData(new UserEntity
                 {
-                    Guid = Guid.NewGuid(),
-                    UserName = "admin",
-                    PasswordHash = PasswordUtil.HashPassword("admin"),
-                    Role = Role.Administrator
+                    Id = Guid.NewGuid(),
+                    Username = "admin",
+                    PasswordHash = PasswordUtil.HashPassword("passw0rd"),
+                    Role = Role.Administrator,
+                    Email = "admin@site-exchange.com",
+                    IsEmailConfirmed = true
                 });
             });
             modelBuilder.Entity<ProductClassAttributeValueEntity>(builder =>
             {
-                builder.HasKey(value => value.Guid);
+                builder.HasKey(value => value.Id);
                 builder.HasIndex(e => new {e.ProductId, e.ProductClassAttributeId}).IsUnique();
                 builder.HasOne(value => value.Product)
                     .WithMany(product => product.ProductClassAttributeValues)
@@ -74,7 +73,7 @@ namespace DatabaseModel
             });
             modelBuilder.Entity<ProductClassAttributeEntity>(builder =>
             {
-                builder.HasKey(value => value.Guid);
+                builder.HasKey(value => value.Id);
                 builder.HasIndex(e => new {e.Name, e.AssociatedClassId}).IsUnique();
                 builder.HasOne(pca => pca.AssociatedClass)
                     .WithMany(pc => pc.ProductClassAttributes)
@@ -86,10 +85,10 @@ namespace DatabaseModel
                 builder.Property(attribute => attribute.ValueDataType).IsRequired().HasDefaultValue(ValueDataType.Text);
             });
             modelBuilder.Entity<ProductClassEntity>(builder => { builder.HasKey(value => value.Name); });
-            modelBuilder.Entity<ProductEntity>(builder => { builder.HasKey(value => value.Guid); });
+            modelBuilder.Entity<ProductEntity>(builder => { builder.HasKey(value => value.Id); });
             modelBuilder.Entity<MeasureUnitEntity>(builder =>
             {
-                builder.HasKey(value => value.Guid);
+                builder.HasKey(value => value.Id);
                 builder.Property(unit => unit.Name).IsRequired();
                 builder.Property(unit => unit.ShortName).IsRequired();
             });
@@ -102,7 +101,7 @@ namespace DatabaseModel
             });
             modelBuilder.Entity<ValueChangeRequestEntity>(builder =>
             {
-                builder.HasKey(value => value.Guid);
+                builder.HasKey(value => value.Id);
                 builder.HasOne(value => value.Sender)
                     .WithMany(user => user.ChangeRequests)
                     .HasForeignKey(value => value.SenderId);
@@ -122,7 +121,7 @@ namespace DatabaseModel
             });
             modelBuilder.Entity<SellerEntity>(builder =>
             {
-                builder.HasKey(entity => entity.Guid);
+                builder.HasKey(entity => entity.Id);
                 builder.HasMany(seller => seller.Products)
                     .WithOne(product => product.Seller)
                     .HasForeignKey(product => product.SellerId)
@@ -138,7 +137,7 @@ namespace DatabaseModel
             });
             modelBuilder.Entity<OrderEntity>(builder =>
             {
-                builder.HasKey(entity => entity.Guid);
+                builder.HasKey(entity => entity.Id);
                 builder.HasOne(entity => entity.Customer)
                     .WithMany(user => user.Orders)
                     .HasForeignKey(entity => entity.CustomerId)
@@ -157,7 +156,7 @@ namespace DatabaseModel
             });
             modelBuilder.Entity<OrderTransactionEntity>(builder =>
             {
-                builder.HasKey(entity => entity.Guid);
+                builder.HasKey(entity => entity.Id);
                 builder.HasOne(entity => entity.Order)
                     .WithMany(order => order.Transactions)
                     .HasForeignKey(entity => entity.OrderId);
@@ -167,7 +166,7 @@ namespace DatabaseModel
             });
             modelBuilder.Entity<BillModifierEntity>(builder =>
             {
-                builder.HasKey(entity => entity.Guid);
+                builder.HasKey(entity => entity.Id);
                 builder.HasDiscriminator();
             });
             modelBuilder.Entity<SellerBillModifierEntity>(builder =>
@@ -187,25 +186,23 @@ namespace DatabaseModel
             });
             modelBuilder.Entity<BillModifierEntity>(builder =>
             {
-                builder.HasKey(entity => entity.Guid);
+                builder.HasKey(entity => entity.Id);
                 builder.HasDiscriminator();
             });
             modelBuilder.Entity<CurrencyEntity>(builder =>
             {
-                builder.HasKey(entity => entity.Guid);
+                builder.HasKey(entity => entity.Id);
                 builder.HasData(new CurrencyEntity
                 {
-                    Guid = Guid.NewGuid(),
+                    Id = Guid.NewGuid(),
                     Abbreviation = "USD",
                     CountryCode = "840",
                     CurrencySign = "$",
                     Name = "United States Dollar"
                 });
             });
-            modelBuilder.Entity<AddressEntity>().HasKey(entity => entity.Guid);
+            modelBuilder.Entity<AddressEntity>().HasKey(entity => entity.Id);
             modelBuilder.Entity<OrderToBillModifier>().HasKey(entity => new { entity.OrderId, entity.BillModifierId});
-            modelBuilder.Entity<UserDeviceLoginEntity>(builder =>
-                builder.HasKey(userDeviceLogin => userDeviceLogin.Guid));
         }
     }
 }

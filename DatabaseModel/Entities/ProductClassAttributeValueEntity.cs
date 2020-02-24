@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DatabaseModel.Entities
+namespace Exchange.Data.Entities
 {
     public class ProductClassAttributeValueEntity: Entity
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DatabaseModel.Entities.JoinEntities
+namespace Exchange.Data.Entities.JoinEntities
 {
     public class ProductProductClassEntity
     {

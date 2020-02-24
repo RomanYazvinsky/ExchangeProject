@@ -49,6 +49,11 @@ export class ToolbarComponent implements OnInit {
       isEnabled$: of(true),
       isAvailable$: this.permissionService.isUserAllowed(Role.Administrator),
       executeAsync: () => this.openAdminPage()
+    }, {
+      label: 'Open Products',
+      isEnabled$: of(true),
+      isAvailable$: this.permissionService.isUserAllowed([Role.Customer, Role.Operator, Role.Administrator]),
+      executeAsync: () => this.openProducts()
     }];
   }
 
@@ -65,6 +70,10 @@ export class ToolbarComponent implements OnInit {
 
   openAdminPage(): Promise<boolean> {
     return this.router.navigate(['admin']);
+  }
+
+  openProducts(): Promise<boolean> {
+    return this.router.navigate(['products']);
   }
 
   logout() {

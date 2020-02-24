@@ -20,4 +20,5 @@ export class PermissionService {
     }
     return this.authService.currentUser$.pipe(map(user => roles.some(grantedRole => Role[grantedRole] === user?.role)));
   }
+
 }

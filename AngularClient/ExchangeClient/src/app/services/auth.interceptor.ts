@@ -48,7 +48,7 @@ export class AuthInterceptor implements HttpInterceptor {
           return authService.refreshTokens().pipe(
             switchMap(() => {
               return next.handle(this.setAuthHeader(req, auth?.accessToken));
-            })
+            }),
           );
         }
         return throwError(error);

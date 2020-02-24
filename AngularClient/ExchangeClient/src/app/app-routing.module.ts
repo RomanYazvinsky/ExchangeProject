@@ -1,5 +1,6 @@
 ﻿import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
+import {AuthGuard} from './services/guards/auth.guard';
 import {NoAuthGuard} from './services/guards/no-auth.guard';
 import {AdministrationZoneGuard} from './services/guards/administration-zone.guard';
 
@@ -16,6 +17,13 @@ const routes: Routes = [
     loadChildren: () => import('./modules/admin-module/admin.module').then(m => m.AdminModuleModule),
     canActivate: [
       AdministrationZoneGuard
+    ]
+  },
+  {
+    path: 'products',
+    loadChildren: () => import('./modules/product-editor/product-editor.module').then(m => m.ProductEditorModule),
+    canActivate: [
+      AuthGuard
     ]
   },
   {

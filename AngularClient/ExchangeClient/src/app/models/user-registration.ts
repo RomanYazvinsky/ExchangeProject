@@ -2,5 +2,4 @@
   username: string;
   password: string;
   email: string;
-  emailConfirmationUrl: string;
 }

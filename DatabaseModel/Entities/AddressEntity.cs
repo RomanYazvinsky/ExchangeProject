@@ -1,4 +1,4 @@
-﻿namespace DatabaseModel.Entities
+﻿namespace Exchange.Data.Entities
 {
     public class AddressEntity: Entity
     {

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using DatabaseModel.Entities.Currency;
+using Exchange.Data.Entities.Currency;
+using Exchange.Data.Entities.User;
 
-namespace DatabaseModel.Entities.Seller
+namespace Exchange.Data.Entities.Seller
 {
     public class SellerEntity: Entity
     {

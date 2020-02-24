@@ -1,8 +1,8 @@
 ﻿using System;
-using DatabaseModel.Entities.Currency;
-using DatabaseModel.Entities.Order;
+using Exchange.Data.Entities.Currency;
+using Exchange.Data.Entities.Order;
 
-namespace DatabaseModel.Entities.JoinEntities
+namespace Exchange.Data.Entities.JoinEntities
 {
     public class OrderToBillModifier
     {

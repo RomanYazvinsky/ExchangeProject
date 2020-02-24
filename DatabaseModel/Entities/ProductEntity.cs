@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using DatabaseModel.Entities.Currency;
-using DatabaseModel.Entities.JoinEntities;
-using DatabaseModel.Entities.Order;
-using DatabaseModel.Entities.Seller;
+using Exchange.Data.Entities.Currency;
+using Exchange.Data.Entities.JoinEntities;
+using Exchange.Data.Entities.Order;
+using Exchange.Data.Entities.Seller;
 
-namespace DatabaseModel.Entities
+namespace Exchange.Data.Entities
 {
     public class ProductEntity: Entity
     {

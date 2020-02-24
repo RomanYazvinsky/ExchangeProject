@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "restore": {
     "projectUniqueName": "C:\\Users\\Raman.Yazvinski\\source\\repos\\Exchange\\DatabaseModel\\DatabaseModel.csproj",
-    "projectName": "DatabaseModel",
+    "projectName": "Exchange.Data",
     "projectPath": "C:\\Users\\Raman.Yazvinski\\source\\repos\\Exchange\\DatabaseModel\\DatabaseModel.csproj",
     "outputPath": "C:\\Users\\Raman.Yazvinski\\source\\repos\\Exchange\\DatabaseModel\\obj\\",
     "projectStyle": "PackageReference",
@@ -15,7 +15,11 @@
     },
     "frameworks": {
       "netcoreapp3.1": {
-        "projectReferences": {}
+        "projectReferences": {
+          "C:\\Users\\Raman.Yazvinski\\source\\repos\\Exchange\\Exchange.Common\\Exchange.Common.csproj": {
+            "projectPath": "C:\\Users\\Raman.Yazvinski\\source\\repos\\Exchange\\Exchange.Common\\Exchange.Common.csproj"
+          }
+        }
       }
     },
     "warningProperties": {
@@ -29,7 +33,13 @@
       "dependencies": {
         "Microsoft.EntityFrameworkCore": {
           "target": "Package",
-          "version": "[3.1.1, )"
+          "version": "[3.1.2, )"
+        },
+        "Microsoft.EntityFrameworkCore.Design": {
+          "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[3.1.2, )"
         },
         "Pomelo.EntityFrameworkCore.MySql": {
           "target": "Package",

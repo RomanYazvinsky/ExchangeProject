@@ -1,1 +1,9 @@
-﻿
+﻿.selectable-row {
+  cursor: pointer;
+  &:hover:not(.selected) {
+    background-color: lightgray;
+  }
+}
+.selected {
+  background-color: darkgray;
+}

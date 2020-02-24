@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DatabaseModel;
 using DatabaseModel.Constants;
 using DatabaseModel.Entities;
 using Exchange.Constants;
+using Exchange.Models;
 using Exchange.Services.EmailConfirmation;
 using Exchange.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Exchange.Services
 {
@@ -117,9 +121,9 @@ namespace Exchange.Services
             return null;
         }
 
-        public async Task<MailConfirmationErrorTypes?> ConfirmEmail(string confirmationId)
+        public async Task<MailConfirmationErrorTypes?> ConfirmEmail(string userIdString)
         {
-            if (string.IsNullOrWhiteSpace(confirmationId) || !Guid.TryParse(confirmationId, out var userId))
+            if (string.IsNullOrWhiteSpace(userIdString) || !Guid.TryParse(userIdString, out var userId))
             {
                 return MailConfirmationErrorTypes.InvalidConfirmationId;
             }
@@ -130,6 +134,7 @@ namespace Exchange.Services
             }
 
             user.IsEmailConfirmed = true;
+            await _context.SaveChangesAsync();
             return null;
         }
 
@@ -140,7 +145,10 @@ namespace Exchange.Services
 
         private string GenerateConfirmationId(UserEntity user)
         {
-            return user.Guid.ToString();
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new EmailConfirmationModel(user), new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            })));
         }
     }
 }

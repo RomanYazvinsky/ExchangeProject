@@ -2,6 +2,7 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {UserRegistration} from '../../../models/user-registration';
+import {EmailConfirmation} from '../components/email-confirmation/model/email-confirmation';
 
 @Injectable()
 export class RegistrationService {
@@ -15,7 +16,7 @@ export class RegistrationService {
     return this.http.post<void>('/api/register', {...user, emailConfirmationUrl: 'emailConfirmation'} as UserRegistration)
   }
 
-  confirmEmail(id: string): Observable<void> {
-    return this.http.post<void>('/api/confirmEmail', {confirmationId: id});
+  confirmEmail(confirmation: EmailConfirmation): Observable<void> {
+    return this.http.post<void>('/api/confirmEmail', confirmation);
   }
 }

@@ -3,4 +3,5 @@
     username: string;
     email: string;
     role: string;
+    isEmailConfirmed: string;
 }

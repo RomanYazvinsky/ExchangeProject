@@ -7,6 +7,10 @@
     <mat-header-cell *matHeaderCellDef>{{'Email'}}</mat-header-cell>
     <mat-cell *matCellDef="let element"> {{element.email}} </mat-cell>
   </ng-container>
+  <ng-container [matColumnDef]="'isEmailConfirmed'">
+    <mat-header-cell *matHeaderCellDef>{{'Confirmed'}}</mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.isEmailConfirmed}} </mat-cell>
+  </ng-container>
   <ng-container [matColumnDef]="'role'">
     <mat-header-cell *matHeaderCellDef>{{'Role'}}</mat-header-cell>
     <mat-cell *matCellDef="let element">

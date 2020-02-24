@@ -13,7 +13,7 @@ import {UserService} from '../../services/user.service';
 })
 export class UserListComponent implements OnInit {
 
-  readonly displayedColumns: (keyof UserDto)[] = ['username', 'email', 'role'];
+  readonly displayedColumns: (keyof UserDto)[] = ['username', 'email','isEmailConfirmed', 'role'];
   users$: Observable<UserDto[]> = this.userService.getUsers();
   readonly roles: (string)[] = Object.keys(Role).filter(key => typeof Role[key] === 'number');
 

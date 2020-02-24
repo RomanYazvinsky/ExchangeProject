@@ -4,7 +4,3 @@
   email: string;
   emailConfirmationUrl: string;
 }
-
-export interface EmailConfirmation {
-  confirmationId: string
-}

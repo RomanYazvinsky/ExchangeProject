@@ -74,7 +74,7 @@ namespace Exchange.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(EmailConfirmationModel confirmation)
         {
-            var error = await _userRegistrationService.ConfirmEmail(confirmation.ConfirmationId);
+            var error = await _userRegistrationService.ConfirmEmail(confirmation.UserId);
             if (error != null)
             {
                 return BadRequest(_ems.GetErrorMessage(error.Value));

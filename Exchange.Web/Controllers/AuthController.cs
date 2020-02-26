@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Exchange.Authentication;
 using Exchange.Core.Constants.Errors;
+using Exchange.Core.Models.Dto;
 using Exchange.Core.Services.ErrorMessages;
-using Exchange.Web.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

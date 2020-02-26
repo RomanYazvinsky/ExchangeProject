@@ -4,30 +4,35 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Exchange.Authentication.Jwt.Impl;
+using Exchange.Authentication.Jwt;
 using Exchange.Authentication.Jwt.Models;
 using Exchange.Common.Utils;
+using Exchange.Core.Constants;
 using Exchange.Core.Constants.Errors;
 using Exchange.Core.Models.Dto;
 using Exchange.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Exchange.Authentication
 {
     public class AuthService
     {
         private readonly ExchangeDbContext _context;
-        private readonly JwtAuthTokenValidationHandler _authTokenValidationHandler;
-        private readonly JwtTokenFactory _tokenFactory;
+        private readonly ITokenValidator _tokenValidator;
+        private readonly ITokenFactory _tokenFactory;
+        private readonly JwtOptions _jwtOptions;
 
         public AuthService(
             ExchangeDbContext context,
-            JwtAuthTokenValidationHandler authTokenValidationHandler,
-            JwtTokenFactory tokenFactory
+            IOptionsMonitor<JwtOptions> optionsMonitor,
+            ITokenValidator tokenValidator,
+            ITokenFactory tokenFactory
         )
         {
             _context = context;
-            _authTokenValidationHandler = authTokenValidationHandler;
+            _jwtOptions = optionsMonitor.Get(AuthenticationConstants.JwtAuthenticationScheme);
+            _tokenValidator = tokenValidator;
             _tokenFactory = tokenFactory;
         }
 
@@ -38,6 +43,7 @@ namespace Exchange.Authentication
             {
                 return null;
             }
+
             var user = await _context.Users.FindAsync(id.Value);
             return user == null ? null : new UserDto(user);
         }
@@ -82,7 +88,7 @@ namespace Exchange.Authentication
                 };
             }
 
-            var validationResult = _authTokenValidationHandler.ValidateToken(refreshToken);
+            var validationResult = _tokenValidator.ValidateToken(_jwtOptions, refreshToken);
             if (validationResult.ValidationResult != AuthTokenValidationResult.Ok)
             {
                 if (validationResult.ValidationResult == AuthTokenValidationResult.Expired)
@@ -99,7 +105,7 @@ namespace Exchange.Authentication
                 };
             }
 
-            var guid =  GetUserId(validationResult.ClaimsPrincipal.Claims);
+            var guid = GetUserId(validationResult.ClaimsPrincipal.Claims);
             var user = await _context.Users.FindAsync(guid);
             return new AuthInfo
             {
@@ -118,6 +124,7 @@ namespace Exchange.Authentication
             {
                 return null;
             }
+
             return Guid.Parse(idClaim.Value);
         }
     }

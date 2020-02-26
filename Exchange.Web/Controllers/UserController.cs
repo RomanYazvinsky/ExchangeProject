@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Exchange.Authentication;
 using Exchange.Core.Constants;
+using Exchange.Core.Constants.Errors;
 using Exchange.Core.Models.Dto;
 using Exchange.Core.Services;
+using Exchange.Core.Services.ErrorMessages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,14 +17,17 @@ namespace Exchange.Web.Controllers
     {
         private readonly UserService _userService;
         private readonly AuthService _authService;
+        private readonly ErrorMessageService _ems;
 
         public UserController(
             UserService userService,
-            AuthService authService
+            AuthService authService,
+            ErrorMessageService ems
         )
         {
             _userService = userService;
             _authService = authService;
+            _ems = ems;
         }
 
         [HttpGet("currentUser")]
@@ -46,7 +48,11 @@ namespace Exchange.Web.Controllers
         [Authorize(Roles = RoleRestrictions.OnlyAdmin)]
         public async Task<IActionResult> ModifyUserRoleAsync(UserDto userDto)
         {
-            await _userService.ModifyUserRoleAsync(userDto.Id, userDto.Role);
+            var modified = await _userService.ModifyUserRoleAsync(userDto.Id, userDto.Role);
+            if (!modified)
+            {
+                return BadRequest(_ems.GetErrorMessage(AuthValidationResult.UserNotFound));
+            }
             return Ok();
         }
     }

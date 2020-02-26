@@ -1,9 +1,8 @@
 ﻿import {HttpClient} from '@angular/common/http';
-import {Injectable, Injector} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, EMPTY, Observable, of} from 'rxjs';
-import {async} from 'rxjs/internal/scheduler/async';
-import {catchError, filter, finalize, first, map, mergeMap, observeOn, switchMap, tap} from 'rxjs/operators';
+import {catchError, filter, finalize, first, map, switchMap, tap} from 'rxjs/operators';
 import {AuthDto} from '../models/auth-dto';
 import {UserDto} from '../models/user.dto';
 import {Base64Converter} from '../Utils/base64.converter';
@@ -22,29 +21,45 @@ export class AuthService {
       localStorage.removeItem('authInfo');
       this._expiration = null;
     } else {
-      const base64 = value.accessToken.split('.')[1];
-      const token = Base64Converter.convert(base64);
-      console.log(token);
-      this._expiration = new Date(token.exp as number * 1000);
+      this.setAccessExpiration(value.accessToken);
       localStorage.setItem('authInfo', JSON.stringify(value));
     }
     this._authentication$.next(value);
   }
 
-  private loadAuthInfo() {
-    const authInfo: AuthDto = JSON.parse(localStorage.getItem('authInfo'));
+  private loadAuthInfo(): void {
+    const authInfo: AuthDto | null = JSON.parse(localStorage.getItem('authInfo'));
+    this.setAccessExpiration(authInfo?.accessToken);
     this._authentication$.next(authInfo);
   }
 
+  private setAccessExpiration(accessToken: string): void {
+    if (!accessToken) {
+      return;
+    }
+    const base64 = accessToken.split('.')[1];
+    if (!base64) {
+      return;
+    }
+    const token = Base64Converter.convert(base64);
+    const expirationDate = new Date(token.exp as number * 1000);
+    if (expirationDate.getTime() < Date.now()) {
+      this._expiration = null;
+      return;
+    }
+    this._expiration = expirationDate;
+  }
+
   private loadCurrentUser(): void {
-    this.authentication$.pipe(
-      observeOn(async), // runs asynchronous
-      first(),
-      switchMap(auth => {
-        return !!auth
-          ? this.http.get<UserDto | null>('/api/currentUser')
-          : EMPTY;
-      })).subscribe(user => this.setCurrentUser(user));
+    setTimeout(() => {
+      this.authentication$.pipe(
+        first(),
+        switchMap(auth => {
+          return !!auth
+            ? this.http.get<UserDto | null>('/api/currentUser')
+            : EMPTY;
+        })).subscribe(user => this.setCurrentUser(user));
+    });
   }
 
   private setCurrentUser(user: UserDto | null) {
@@ -90,10 +105,10 @@ export class AuthService {
     return this.http.get<AuthDto | null>('/api/refreshToken', {
       params: {refreshToken: auth.refreshToken}
     }).pipe(
-      catchError(() => {
+      catchError(() => this.logout().pipe(switchMap(() => {
         this.router.navigate(['login']);
         return EMPTY;
-      }),
+      }))),
       filter(token => !!token),
       tap(token => this.updateAuth(token)),
       finalize(() => this._isAuthBlocked = false)

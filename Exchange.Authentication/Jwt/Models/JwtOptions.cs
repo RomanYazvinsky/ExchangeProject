@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Exchange.Authentication.Jwt.Impl.Options
+namespace Exchange.Authentication.Jwt.Models
 {
     public class JwtOptions : AuthenticationSchemeOptions
     {
@@ -10,6 +10,6 @@ namespace Exchange.Authentication.Jwt.Impl.Options
 
         public TimeSpan RefreshTokenExpiration { get; set; }
         public TimeSpan AccessTokenExpiration { get; set; }
-        public TokenValidationParameters TokenValidationParameters { get; set; }
+        public TokenValidationParameters? TokenValidationParameters { get; set; }
     }
 }

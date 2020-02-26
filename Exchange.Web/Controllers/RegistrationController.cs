@@ -6,7 +6,6 @@ using Exchange.Core.Models.Dto;
 using Exchange.Core.Models.Dto.Validation;
 using Exchange.Core.Services;
 using Exchange.Core.Services.ErrorMessages;
-using Exchange.Web.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -81,7 +80,7 @@ namespace Exchange.Web.Controllers
         public async Task<IActionResult> ConfirmEmailAsync(EmailConfirmationDto confirmation)
         {
             var error = await _userRegistrationService.ConfirmEmail(confirmation.UserId);
-            if (error != MailConfirmationResult.Ok || error != MailConfirmationResult.AlreadyConfirmed)
+            if (error != MailConfirmationResult.Ok && error != MailConfirmationResult.AlreadyConfirmed)
             {
                 return BadRequest(_ems.GetErrorMessage(error));
             }

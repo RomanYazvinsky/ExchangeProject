@@ -38,7 +38,6 @@ namespace Exchange
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             services.SetJwtAuthenticationAsDefault().AddJwtAuthorization(jwtSettings);
-            services.AddSingleton<JwtTokenFactory>();
             services.AddSingleton<JwtSecurityTokenHandler>();
             services.AddSingleton<ErrorMessageService>();
             services.AddSingleton<EmailService>();

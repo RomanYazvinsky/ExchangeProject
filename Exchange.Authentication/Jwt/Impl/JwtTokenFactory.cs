@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Exchange.Authentication.Jwt.Impl.Options;
+using Exchange.Authentication.Jwt.Models;
 using Exchange.Core.Constants;
 using Exchange.Data.Constants;
 using Microsoft.Extensions.Options;
@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Exchange.Authentication.Jwt.Impl
 {
-    public class JwtTokenFactory
+    public class JwtTokenFactory : ITokenFactory
     {
         private readonly JwtOptions _options;
         private readonly JwtSecurityTokenHandler _tokenHandler;

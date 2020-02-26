@@ -1,17 +1,13 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Exchange.Authentication.Jwt.Impl.Options;
 using Exchange.Authentication.Jwt.Models;
 using Exchange.Core.Constants;
 using Exchange.Core.Services.ErrorMessages;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 
 namespace Exchange.Authentication.Jwt.Impl
@@ -19,7 +15,7 @@ namespace Exchange.Authentication.Jwt.Impl
     public class JwtAuthTokenValidationHandler : AuthenticationHandler<JwtOptions>
     {
         private readonly ErrorMessageService _ems;
-        private readonly JwtSecurityTokenHandler _tokenHandler;
+        private readonly ITokenValidator _tokenValidator;
 
         public JwtAuthTokenValidationHandler(
             ErrorMessageService ems,
@@ -27,40 +23,13 @@ namespace Exchange.Authentication.Jwt.Impl
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            JwtSecurityTokenHandler tokenHandler
-        ): base(options, logger, encoder, clock)
+            ITokenValidator tokenValidator
+        ) : base(options, logger, encoder, clock)
         {
             _ems = ems;
-            _tokenHandler = tokenHandler;
+            _tokenValidator = tokenValidator;
         }
 
-        public TokenValidationInfo ValidateToken(string token)
-        {
-            try
-            {
-                var claimsPrincipal =
-                    _tokenHandler.ValidateToken(token, Options.TokenValidationParameters.Clone(), out _);
-                return new TokenValidationInfo
-                {
-                    ValidationResult = AuthTokenValidationResult.Ok,
-                    ClaimsPrincipal = claimsPrincipal
-                };
-            }
-            catch (SecurityTokenExpiredException)
-            {
-                return new TokenValidationInfo
-                {
-                    ValidationResult = AuthTokenValidationResult.Expired
-                };
-            }
-            catch (Exception)
-            {
-                return new TokenValidationInfo
-                {
-                    ValidationResult = AuthTokenValidationResult.Corrupted
-                };
-            }
-        }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
@@ -84,11 +53,12 @@ namespace Exchange.Authentication.Jwt.Impl
                 return Task.FromResult(AuthenticateResult.NoResult());
             }
 
-            var tokenValidationResult = ValidateToken(token);
+            var tokenValidationResult = _tokenValidator.ValidateToken(Options, token);
             if (tokenValidationResult.ValidationResult != AuthTokenValidationResult.Ok)
             {
                 return Task.FromResult(AuthenticateResult.Fail(_ems.GetErrorMessage("error.auth.invalid.token")));
             }
+
             var claimsIdentity = tokenValidationResult.ClaimsPrincipal;
             var authenticationTicket = new AuthenticationTicket(
                 new ClaimsPrincipal(claimsIdentity),

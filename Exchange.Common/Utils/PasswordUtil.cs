@@ -11,12 +11,9 @@ namespace Exchange.Common.Utils
         private static readonly HashAlgorithmName HashAlgorithm = HashAlgorithmName.SHA256;
         public static byte[] GenerateSalt()
         {
-            var salt = new byte[128 / 8];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(salt);
-            }
-
+            var salt = new byte[HashLength / sizeof(byte)];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(salt);
             return salt;
         }
 
@@ -38,13 +35,13 @@ namespace Exchange.Common.Utils
         {
             if (string.IsNullOrWhiteSpace(password))
             {
-                throw new ArgumentException($"Provided password is empty: '{password ?? "null"}'");
+                throw new ArgumentException("Provided password is empty");
             }
 
             var passwordInfo = password.Split(".");
             if (passwordInfo.Length != 2)
             {
-                throw new ArgumentException("Provided password is not of correct type " + password);
+                throw new ArgumentException("Provided password is not of correct type");
             }
 
             return (Convert.FromBase64String(passwordInfo[0]), Convert.FromBase64String(passwordInfo[1]));

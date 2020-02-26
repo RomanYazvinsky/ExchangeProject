@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using Exchange.Authentication.Jwt.Impl;
-using Exchange.Authentication.Jwt.Impl.Options;
+using Exchange.Authentication.Jwt.Models;
 using Exchange.Core.Constants;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +33,8 @@ namespace Exchange.Authentication.Jwt
             var keyBytes = Encoding.ASCII.GetBytes(key);
             var accessTokenExpiration = Convert.ToInt32(configurationSection["AccessExpirationSeconds"]);
             var refreshTokenExpiration = Convert.ToInt32(configurationSection["RefreshExpirationSeconds"]);
+            authenticationBuilder.Services.AddSingleton<ITokenFactory, JwtTokenFactory>();
+            authenticationBuilder.Services.AddScoped<ITokenValidator, JwtTokenValidator>();
             return authenticationBuilder.AddScheme<JwtOptions, JwtAuthTokenValidationHandler>(AuthenticationConstants.JwtAuthenticationScheme,options =>
             {
                 options.SigningKey = key;

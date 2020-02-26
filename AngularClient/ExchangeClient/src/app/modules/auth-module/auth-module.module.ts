@@ -34,7 +34,7 @@ import { EmailConfirmationComponent } from './components/email-confirmation/emai
             path: 'register',
             component: UserRegistrationComponent
           }, {
-            path: 'emailConfirmation/:data',
+            path: 'confirmation/:data',
             component: EmailConfirmationComponent,
           }
         ]

@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Exchange.Authentication;
+using Exchange.Authentication.Jwt;
 using Exchange.Core.Constants;
 using Exchange.Core.Constants.Errors;
 using Exchange.Core.Models.Dto;
 using Exchange.Core.Services;
 using Exchange.Core.Services.ErrorMessages;
+using Exchange.Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,12 +18,12 @@ namespace Exchange.Web.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
         private readonly ErrorMessageService _ems;
 
         public UserController(
             UserService userService,
-            AuthService authService,
+            IAuthService authService,
             ErrorMessageService ems
         )
         {
@@ -32,23 +34,23 @@ namespace Exchange.Web.Controllers
 
         [HttpGet("currentUser")]
         [Authorize]
-        public Task<UserDto> GetCurrentUserInfo()
+        public Task<UserVm> GetCurrentUserInfo()
         {
             return _authService.GetCurrentUserAsync(Request.HttpContext.User.Claims);
         }
 
         [HttpGet("users")]
         [Authorize(Roles = RoleRestrictions.OnlyAdmin)]
-        public Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        public Task<IEnumerable<UserVm>> GetAllUsersAsync()
         {
             return _userService.GetAllUsersAsync();
         }
 
         [HttpPost("userRole")]
         [Authorize(Roles = RoleRestrictions.OnlyAdmin)]
-        public async Task<IActionResult> ModifyUserRoleAsync(UserDto userDto)
+        public async Task<IActionResult> ModifyUserRoleAsync(UserVm userVm)
         {
-            var modified = await _userService.ModifyUserRoleAsync(userDto.Id, userDto.Role);
+            var modified = await _userService.ModifyUserRoleAsync(userVm.Id, userVm.Role);
             if (!modified)
             {
                 return BadRequest(_ems.GetErrorMessage(AuthValidationResult.UserNotFound));

@@ -9,6 +9,7 @@ using Exchange.Core.Models.Dto;
 using Exchange.Core.Services.EmailConfirmation;
 using Exchange.Core.Services.EmailConfirmation.Models;
 using Exchange.Core.Services.ErrorMessages;
+using Exchange.Core.ViewModels;
 using Exchange.Data;
 using Exchange.Data.Constants;
 using Exchange.Data.Entities.User;
@@ -72,7 +73,7 @@ namespace Exchange.Core.Services
             return true;
         }
 
-        public async Task<UserDto?> RegisterUser(string username, string password, string email)
+        public async Task<UserVm?> RegisterUser(string username, string password, string email)
         {
             if (!await IsValid(username, password, email))
             {
@@ -90,10 +91,10 @@ namespace Exchange.Core.Services
             };
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
-            return new UserDto(newUser);
+            return new UserVm(newUser);
         }
 
-        public async Task<MailConfirmationResult> SendConfirmationEmail([NotNull] UserDto user)
+        public async Task<MailConfirmationResult> SendConfirmationEmail([NotNull] UserVm user)
         {
             if (user.IsEmailConfirmed)
             {
@@ -133,9 +134,9 @@ namespace Exchange.Core.Services
             return MailConfirmationResult.Ok;
         }
 
-        private string GenerateConfirmationId(UserDto user)
+        private string GenerateConfirmationId(UserVm user)
         {
-            var json = JsonConvert.SerializeObject(new EmailConfirmationDto(user), JsonSerializerSettings);
+            var json = JsonConvert.SerializeObject(new EmailConfirmationVm(user), JsonSerializerSettings);
             return Convert.ToBase64String(
                 Encoding.UTF8.GetBytes(json));
         }

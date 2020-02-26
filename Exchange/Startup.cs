@@ -43,7 +43,7 @@ namespace Exchange
             services.AddSingleton<EmailService>();
             services.AddScoped<CredentialValidationService>();
             services.AddScoped<UserRegistrationService>();
-            services.AddScoped<AuthService>();
+            services.AddScoped<IAuthService, JwtAuthService>();
             services.AddScoped<UserService>();
 
             services.AddCors(options =>

@@ -3,15 +3,15 @@ using System.ComponentModel.DataAnnotations;
 using Exchange.Data.Constants;
 using Exchange.Data.Entities.User;
 
-namespace Exchange.Core.Models.Dto
+namespace Exchange.Core.ViewModels
 {
-    public class UserDto
+    public class UserVm
     {
-        public UserDto()
+        public UserVm()
         {
         }
 
-        public UserDto(UserEntity user)
+        public UserVm(UserEntity user)
         {
             Username = user.Username;
             Email = user.Email;

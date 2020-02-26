@@ -1,8 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Exchange.Authentication;
+using Exchange.Authentication.Jwt;
 using Exchange.Core.Constants.Errors;
 using Exchange.Core.Models.Dto;
 using Exchange.Core.Services.ErrorMessages;
+using Exchange.Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,10 +14,10 @@ namespace Exchange.Web.Controllers
     [Route("api")]
     public class AuthController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
         private readonly ErrorMessageService _ems;
 
-        public AuthController(AuthService authService, ErrorMessageService ems)
+        public AuthController(IAuthService authService, ErrorMessageService ems)
         {
             _authService = authService;
             _ems = ems;
@@ -35,9 +37,9 @@ namespace Exchange.Web.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginAsync(UserLoginDto userLoginDto)
+        public async Task<IActionResult> LoginAsync(UserLoginVm userLoginVm)
         {
-            var result = await _authService.LoginAsync(userLoginDto.Username, userLoginDto.Password);
+            var result = await _authService.LoginAsync(userLoginVm.Username, userLoginVm.Password);
             if (result.Result != AuthValidationResult.Ok)
             {
                 return BadRequest(_ems.GetErrorMessage(result.Result));

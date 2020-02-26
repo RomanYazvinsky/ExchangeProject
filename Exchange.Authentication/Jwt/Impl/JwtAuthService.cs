@@ -4,26 +4,26 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Exchange.Authentication.Jwt;
 using Exchange.Authentication.Jwt.Models;
 using Exchange.Common.Utils;
 using Exchange.Core.Constants;
 using Exchange.Core.Constants.Errors;
 using Exchange.Core.Models.Dto;
+using Exchange.Core.ViewModels;
 using Exchange.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace Exchange.Authentication
+namespace Exchange.Authentication.Jwt.Impl
 {
-    public class AuthService
+    public class JwtAuthService : IAuthService
     {
         private readonly ExchangeDbContext _context;
         private readonly ITokenValidator _tokenValidator;
         private readonly ITokenFactory _tokenFactory;
         private readonly JwtOptions _jwtOptions;
 
-        public AuthService(
+        public JwtAuthService(
             ExchangeDbContext context,
             IOptionsMonitor<JwtOptions> optionsMonitor,
             ITokenValidator tokenValidator,
@@ -36,7 +36,7 @@ namespace Exchange.Authentication
             _tokenFactory = tokenFactory;
         }
 
-        public async Task<UserDto?> GetCurrentUserAsync(IEnumerable<Claim> claims)
+        public async Task<UserVm?> GetCurrentUserAsync(IEnumerable<Claim> claims)
         {
             var id = GetUserId(claims);
             if (id == null)
@@ -45,16 +45,16 @@ namespace Exchange.Authentication
             }
 
             var user = await _context.Users.FindAsync(id.Value);
-            return user == null ? null : new UserDto(user);
+            return user == null ? null : new UserVm(user);
         }
 
-        public async Task<AuthInfo> LoginAsync([NotNull] string username, [NotNull] string password)
+        public async Task<AuthDto> LoginAsync([NotNull] string username, [NotNull] string password)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username.Equals(username));
             if (user == null)
             {
-                return new AuthInfo
+                return new AuthDto
                 {
                     Result = AuthValidationResult.UserNotFound
                 };
@@ -62,15 +62,15 @@ namespace Exchange.Authentication
 
             if (!PasswordUtil.PasswordEqual(password, user.PasswordHash))
             {
-                return new AuthInfo
+                return new AuthDto
                 {
                     Result = AuthValidationResult.InvalidPassword
                 };
             }
 
-            return new AuthInfo
+            return new AuthDto
             {
-                Auth = new AuthDto
+                Auth = new AuthVm
                 {
                     AccessToken = _tokenFactory.BuildAccessToken(user.Id, user.Role),
                     RefreshToken = _tokenFactory.BuildRefreshToken(user.Id)
@@ -78,11 +78,11 @@ namespace Exchange.Authentication
             };
         }
 
-        public async Task<AuthInfo> RefreshTokenAsync(string? refreshToken)
+        public async Task<AuthDto> RefreshTokenAsync(string? refreshToken)
         {
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                return new AuthInfo
+                return new AuthDto
                 {
                     Result = AuthValidationResult.InvalidRefreshToken
                 };
@@ -93,13 +93,13 @@ namespace Exchange.Authentication
             {
                 if (validationResult.ValidationResult == AuthTokenValidationResult.Expired)
                 {
-                    return new AuthInfo
+                    return new AuthDto
                     {
                         Result = AuthValidationResult.ExpiredRefreshToken
                     };
                 }
 
-                return new AuthInfo
+                return new AuthDto
                 {
                     Result = AuthValidationResult.InvalidRefreshToken
                 };
@@ -107,9 +107,9 @@ namespace Exchange.Authentication
 
             var guid = GetUserId(validationResult.ClaimsPrincipal.Claims);
             var user = await _context.Users.FindAsync(guid);
-            return new AuthInfo
+            return new AuthDto
             {
-                Auth = new AuthDto
+                Auth = new AuthVm
                 {
                     AccessToken = _tokenFactory.BuildAccessToken(user.Id, user.Role),
                     RefreshToken = _tokenFactory.BuildRefreshToken(user.Id)
@@ -117,7 +117,7 @@ namespace Exchange.Authentication
             };
         }
 
-        private Guid? GetUserId(IEnumerable<Claim> claims)
+        private Guid? GetUserId([NotNull] IEnumerable<Claim> claims)
         {
             var idClaim = claims.FirstOrDefault(claim => ClaimTypes.NameIdentifier.Equals(claim.Type));
             if (idClaim == null)

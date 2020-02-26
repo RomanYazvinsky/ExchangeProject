@@ -13,13 +13,13 @@ namespace Exchange.Authentication.Jwt.Impl
         {
             _tokenHandler = tokenHandler;
         }
-        public TokenValidationInfo ValidateToken(JwtOptions options, string token)
+        public TokenValidationDto ValidateToken(JwtOptions options, string token)
         {
             try
             {
                 var claimsPrincipal =
                     _tokenHandler.ValidateToken(token, options.TokenValidationParameters.Clone(), out _);
-                return new TokenValidationInfo
+                return new TokenValidationDto
                 {
                     ValidationResult = AuthTokenValidationResult.Ok,
                     ClaimsPrincipal = claimsPrincipal
@@ -27,14 +27,14 @@ namespace Exchange.Authentication.Jwt.Impl
             }
             catch (SecurityTokenExpiredException)
             {
-                return new TokenValidationInfo
+                return new TokenValidationDto
                 {
                     ValidationResult = AuthTokenValidationResult.Expired
                 };
             }
             catch (Exception)
             {
-                return new TokenValidationInfo
+                return new TokenValidationDto
                 {
                     ValidationResult = AuthTokenValidationResult.Corrupted
                 };

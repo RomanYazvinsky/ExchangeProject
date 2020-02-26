@@ -2,7 +2,7 @@
 
 namespace Exchange.Authentication.Jwt.Models
 {
-    public class TokenValidationInfo
+    public class TokenValidationDto
     {
         public AuthTokenValidationResult ValidationResult { get; set; }
         public ClaimsPrincipal? ClaimsPrincipal { get; set; }

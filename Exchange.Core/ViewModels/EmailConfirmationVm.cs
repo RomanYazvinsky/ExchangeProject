@@ -1,19 +1,19 @@
 ﻿using Exchange.Data.Entities.User;
 
-namespace Exchange.Core.Models.Dto
+namespace Exchange.Core.ViewModels
 {
-    public class EmailConfirmationDto
+    public class EmailConfirmationVm
     {
-        public EmailConfirmationDto()
+        public EmailConfirmationVm()
         {
         }
-        public EmailConfirmationDto(UserEntity user)
+        public EmailConfirmationVm(UserEntity user)
         {
             this.UserId = user.Id.ToString();
             this.Email = user.Email;
             this.Username = user.Username;
         }
-        public EmailConfirmationDto(UserDto user)
+        public EmailConfirmationVm(UserVm user)
         {
             this.UserId = user.Id.ToString();
             this.Email = user.Email;

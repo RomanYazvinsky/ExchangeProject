@@ -12,6 +12,12 @@ namespace Exchange.Authentication.Jwt
 {
     public static class JwtAuthenticationConfigurationExtensions
     {
+        public const string JwtOptionsSigningKey = "SigningKey";
+        public const string JwtOptionsAccessExpiration = "AccessExpirationSeconds";
+        public const string JwtOptionsRefreshExpiration = "RefreshExpirationSeconds";
+        public const string JwtOptionsValidAudience = "ValidAudience";
+        public const string JwtOptionsValidIssuer = "ValidIssuer";
+
         public static AuthenticationBuilder SetJwtAuthenticationAsDefault(this IServiceCollection services)
         {
             return services.AddAuthentication(options =>
@@ -29,27 +35,28 @@ namespace Exchange.Authentication.Jwt
             IConfiguration configurationSection
         )
         {
-            var key = configurationSection["SigningKey"];
+            var key = configurationSection[JwtOptionsSigningKey];
             var keyBytes = Encoding.ASCII.GetBytes(key);
-            var accessTokenExpiration = Convert.ToInt32(configurationSection["AccessExpirationSeconds"]);
-            var refreshTokenExpiration = Convert.ToInt32(configurationSection["RefreshExpirationSeconds"]);
+            var accessTokenExpiration = Convert.ToInt32(configurationSection[JwtOptionsAccessExpiration]);
+            var refreshTokenExpiration = Convert.ToInt32(configurationSection[JwtOptionsRefreshExpiration]);
             authenticationBuilder.Services.AddSingleton<ITokenFactory, JwtTokenFactory>();
             authenticationBuilder.Services.AddScoped<ITokenValidator, JwtTokenValidator>();
-            return authenticationBuilder.AddScheme<JwtOptions, JwtAuthTokenValidationHandler>(AuthenticationConstants.JwtAuthenticationScheme,options =>
-            {
-                options.SigningKey = key;
-                options.AccessTokenExpiration = TimeSpan.FromSeconds(accessTokenExpiration);
-                options.RefreshTokenExpiration = TimeSpan.FromSeconds(refreshTokenExpiration);
-                options.TokenValidationParameters = new TokenValidationParameters
+            return authenticationBuilder.AddScheme<JwtOptions, JwtAuthTokenValidationHandler>(
+                AuthenticationConstants.JwtAuthenticationScheme, options =>
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-                    ValidateAudience = true,
-                    ValidAudience = configurationSection["ValidAudience"],
-                    ValidateIssuer = true,
-                    ValidIssuer = configurationSection["ValidIssuer"],
-                    ValidateLifetime = true
-                };
-            });
-            }
+                    options.SigningKey = key;
+                    options.AccessTokenExpiration = TimeSpan.FromSeconds(accessTokenExpiration);
+                    options.RefreshTokenExpiration = TimeSpan.FromSeconds(refreshTokenExpiration);
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+                        ValidateAudience = true,
+                        ValidAudience = configurationSection[JwtOptionsValidAudience],
+                        ValidateIssuer = true,
+                        ValidIssuer = configurationSection[JwtOptionsValidIssuer],
+                        ValidateLifetime = true
+                    };
+                });
+        }
     }
 }

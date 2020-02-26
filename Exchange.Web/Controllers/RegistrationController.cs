@@ -6,6 +6,7 @@ using Exchange.Core.Models.Dto;
 using Exchange.Core.Models.Dto.Validation;
 using Exchange.Core.Services;
 using Exchange.Core.Services.ErrorMessages;
+using Exchange.Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -60,12 +61,12 @@ namespace Exchange.Web.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterAsync(UserRegistrationDto registrationDto)
+        public async Task<IActionResult> RegisterAsync(UserRegistrationVm registrationVm)
         {
             var user = await _userRegistrationService.RegisterUser(
-                registrationDto.Username,
-                registrationDto.Password,
-                registrationDto.Email);
+                registrationVm.Username,
+                registrationVm.Password,
+                registrationVm.Email);
             var mailError = await _userRegistrationService.SendConfirmationEmail(user);
             if (mailError != MailConfirmationResult.Ok && mailError != MailConfirmationResult.AlreadyConfirmed)
             {
@@ -77,7 +78,7 @@ namespace Exchange.Web.Controllers
 
         [HttpPost("confirmEmail")]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmailAsync(EmailConfirmationDto confirmation)
+        public async Task<IActionResult> ConfirmEmailAsync(EmailConfirmationVm confirmation)
         {
             var error = await _userRegistrationService.ConfirmEmail(confirmation.UserId);
             if (error != MailConfirmationResult.Ok && error != MailConfirmationResult.AlreadyConfirmed)

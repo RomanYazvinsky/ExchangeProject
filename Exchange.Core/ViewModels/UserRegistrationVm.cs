@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Exchange.Core.Models.Dto
+namespace Exchange.Core.ViewModels
 {
-    public class UserRegistrationDto
+    public class UserRegistrationVm
     {
         [Required] public string Username { get; set; }
         [Required] public string Password { get; set; }

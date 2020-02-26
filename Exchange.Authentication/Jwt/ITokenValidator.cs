@@ -4,6 +4,6 @@ namespace Exchange.Authentication.Jwt
 {
     public interface ITokenValidator
     {
-        TokenValidationInfo ValidateToken(JwtOptions options, string token);
+        TokenValidationDto ValidateToken(JwtOptions options, string token);
     }
 }

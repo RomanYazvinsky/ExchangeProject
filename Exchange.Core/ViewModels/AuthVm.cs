@@ -1,6 +1,6 @@
-﻿namespace Exchange.Core.Models.Dto
+﻿namespace Exchange.Core.ViewModels
 {
-    public class AuthDto
+    public class AuthVm
     {
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }

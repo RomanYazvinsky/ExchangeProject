@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Exchange.Core.Models.Dto;
+using Exchange.Core.ViewModels;
 using Exchange.Data;
 using Exchange.Data.Constants;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +19,9 @@ namespace Exchange.Core.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
+        public async Task<IEnumerable<UserVm>> GetAllUsersAsync()
         {
-            return (await _context.Users.ToListAsync()).Select(user => new UserDto(user));
+            return (await _context.Users.ToListAsync()).Select(user => new UserVm(user));
         }
 
         public async Task<bool> ModifyUserRoleAsync(Guid userId, Role role)

@@ -23,7 +23,22 @@
     </mat-cell>
   </ng-container>
 
+  <ng-container [matColumnDef]="'removeUserButton'">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let element">
+      <button [disabled]="element.id === (currentUser | async).id"
+              mat-raised-button
+              (click)="removeUser(element)"
+              class="remove-button"
+      >
+        Remove
+      </button>
+    </mat-cell>
+  </ng-container>
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns;" class="selectable-row" [class.selected]="selectedUser?.id === row.id"
-           (click)="selectRow(row)" (dblclick)="openUser(row)"></mat-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"
+           class="selectable-row"
+           [class.selected]="selection.isSelected(row)"
+           (click)="selection.toggle(row)"
+           (dblclick)="openUser(row)"></mat-row>
 </mat-table>

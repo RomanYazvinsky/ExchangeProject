@@ -6,9 +6,9 @@ using Exchange.Core.Constants.Errors;
 using Exchange.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Exchange.Core.Services
+namespace Exchange.Core.Services.Impl
 {
-    public class CredentialValidationService
+    public class CredentialValidationService : ICredentialValidationService
     {
         private readonly ExchangeDbContext _context;
 

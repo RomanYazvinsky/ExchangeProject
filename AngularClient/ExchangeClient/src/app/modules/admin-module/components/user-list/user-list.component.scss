@@ -1,9 +1,22 @@
-﻿.selectable-row {
+﻿@import "../../../../../styles/palette";
+
+.selectable-row {
   cursor: pointer;
-  &:hover:not(.selected) {
+
+  &:hover {
     background-color: lightgray;
   }
+
+  &.selected {
+    background-color: darkgray;
+  }
 }
-.selected {
-  background-color: darkgray;
+
+.remove-button {
+  background-color: map_get($warn, 'darker');
+}
+
+.mat-column-removeUserButton {
+  flex: 0 0 100px;
+  justify-content: center;
 }

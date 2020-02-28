@@ -1,4 +1,4 @@
-﻿namespace Exchange.Core.Services.EmailConfirmation.Models
+﻿namespace Exchange.Core.Services.Models
 {
     public enum SendEmailResult
     {

@@ -13,7 +13,6 @@ export class UserEditComponent implements OnInit {
 
   ngOnInit() {
     const param = this.activatedRoute.snapshot.params['userId'];
-    console.log(param);
   }
 
 }

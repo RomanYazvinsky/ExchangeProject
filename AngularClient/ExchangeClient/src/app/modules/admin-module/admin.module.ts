@@ -1,10 +1,11 @@
-﻿import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {UserListComponent} from './components/user-list/user-list.component';
-import {UserEditComponent} from './components/user-edit/user-edit.component';
-import {RouterModule} from '@angular/router';
+﻿import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
 import {MatSelectModule} from '@angular/material/select';
 import {MatTableModule} from '@angular/material/table';
+import {RouterModule} from '@angular/router';
+import {UserEditComponent} from './components/user-edit/user-edit.component';
+import {UserListComponent} from './components/user-list/user-list.component';
 import {UserService} from './services/user.service';
 
 @NgModule({
@@ -19,7 +20,7 @@ import {UserService} from './services/user.service';
       children: [{
         path: 'user/:userId',
         component: UserEditComponent
-      },{
+      }, {
         path: 'user',
         redirectTo: ''
       }, {
@@ -29,7 +30,8 @@ import {UserService} from './services/user.service';
       ]
     }]),
     MatTableModule,
-    MatSelectModule
+    MatSelectModule,
+    MatButtonModule
   ]
 })
 export class AdminModuleModule {

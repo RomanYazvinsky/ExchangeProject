@@ -14,6 +14,7 @@
     "UseSsl": true,
     "UseOAuth": false,
     "ConfirmationUrl": "http://localhost:4200/confirmation",
-    "EmailTemplatePath": "Assets/registration-confirmation-mail-form.html"
+    "EmailTemplatePath": "Assets/registration-confirmation-mail-form.html",
+    "EmailPoolingTimeoutMilliseconds": 30000
   }
 }

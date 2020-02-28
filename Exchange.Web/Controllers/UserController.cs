@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Exchange.Authentication;
 using Exchange.Authentication.Jwt;
+using Exchange.Common.Utils;
 using Exchange.Core.Constants;
 using Exchange.Core.Constants.Errors;
-using Exchange.Core.Models.Dto;
 using Exchange.Core.Services;
-using Exchange.Core.Services.ErrorMessages;
 using Exchange.Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,14 +15,14 @@ namespace Exchange.Web.Controllers
     [Route("api")]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly IAuthService _authService;
-        private readonly ErrorMessageService _ems;
+        private readonly IErrorMessageService _ems;
 
         public UserController(
-            UserService userService,
+            IUserService userService,
             IAuthService authService,
-            ErrorMessageService ems
+            IErrorMessageService ems
         )
         {
             _userService = userService;
@@ -46,6 +44,24 @@ namespace Exchange.Web.Controllers
             return _userService.GetAllUsersAsync();
         }
 
+
+        [HttpPost("removeUser")]
+        [Authorize(Roles = RoleRestrictions.OnlyAdmin)]
+        public async Task<IActionResult> RemoveUserAsync(UserVm user)
+        {
+            if (AuthUtils.GetUserId(HttpContext.User.Claims) == user.Id)
+            {
+                return BadRequest(_ems.GetErrorMessage("error.remove.current.user"));
+            }
+            var result = await _userService.RemoveUserAsync(user.Id);
+            if (!result)
+            {
+                return BadRequest(_ems.GetErrorMessage(UserValidationResult.UserNotFound));
+            }
+
+            return Ok();
+        }
+
         [HttpPost("userRole")]
         [Authorize(Roles = RoleRestrictions.OnlyAdmin)]
         public async Task<IActionResult> ModifyUserRoleAsync(UserVm userVm)
@@ -53,7 +69,7 @@ namespace Exchange.Web.Controllers
             var modified = await _userService.ModifyUserRoleAsync(userVm.Id, userVm.Role);
             if (!modified)
             {
-                return BadRequest(_ems.GetErrorMessage(AuthValidationResult.UserNotFound));
+                return BadRequest(_ems.GetErrorMessage(UserValidationResult.UserNotFound));
             }
             return Ok();
         }

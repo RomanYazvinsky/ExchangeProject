@@ -8,7 +8,6 @@ using Exchange.Authentication.Jwt.Models;
 using Exchange.Common.Utils;
 using Exchange.Core.Constants;
 using Exchange.Core.Constants.Errors;
-using Exchange.Core.Models.Dto;
 using Exchange.Core.ViewModels;
 using Exchange.Data;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +37,7 @@ namespace Exchange.Authentication.Jwt.Impl
 
         public async Task<UserVm?> GetCurrentUserAsync(IEnumerable<Claim> claims)
         {
-            var id = GetUserId(claims);
+            var id = AuthUtils.GetUserId(claims);
             if (id == null)
             {
                 return null;
@@ -56,7 +55,7 @@ namespace Exchange.Authentication.Jwt.Impl
             {
                 return new AuthDto
                 {
-                    Result = AuthValidationResult.UserNotFound
+                    Result = UserValidationResult.UserNotFound
                 };
             }
 
@@ -64,7 +63,7 @@ namespace Exchange.Authentication.Jwt.Impl
             {
                 return new AuthDto
                 {
-                    Result = AuthValidationResult.InvalidPassword
+                    Result = UserValidationResult.InvalidPassword
                 };
             }
 
@@ -84,7 +83,7 @@ namespace Exchange.Authentication.Jwt.Impl
             {
                 return new AuthDto
                 {
-                    Result = AuthValidationResult.InvalidRefreshToken
+                    Result = UserValidationResult.InvalidRefreshToken
                 };
             }
 
@@ -95,17 +94,17 @@ namespace Exchange.Authentication.Jwt.Impl
                 {
                     return new AuthDto
                     {
-                        Result = AuthValidationResult.ExpiredRefreshToken
+                        Result = UserValidationResult.ExpiredRefreshToken
                     };
                 }
 
                 return new AuthDto
                 {
-                    Result = AuthValidationResult.InvalidRefreshToken
+                    Result = UserValidationResult.InvalidRefreshToken
                 };
             }
 
-            var guid = GetUserId(validationResult.ClaimsPrincipal.Claims);
+            var guid = AuthUtils.GetUserId(validationResult.ClaimsPrincipal.Claims);
             var user = await _context.Users.FindAsync(guid);
             return new AuthDto
             {
@@ -115,17 +114,6 @@ namespace Exchange.Authentication.Jwt.Impl
                     RefreshToken = _tokenFactory.BuildRefreshToken(user.Id)
                 }
             };
-        }
-
-        private Guid? GetUserId([NotNull] IEnumerable<Claim> claims)
-        {
-            var idClaim = claims.FirstOrDefault(claim => ClaimTypes.NameIdentifier.Equals(claim.Type));
-            if (idClaim == null)
-            {
-                return null;
-            }
-
-            return Guid.Parse(idClaim.Value);
         }
     }
 }

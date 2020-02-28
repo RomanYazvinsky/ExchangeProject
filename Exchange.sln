@@ -5,17 +5,17 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Exchange", "Exchange\Exchange.csproj", "{25844FF3-E447-4DBB-A890-E8A33C7F8D63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseModel", "DatabaseModel\DatabaseModel.csproj", "{039C1A38-76C3-4367-85E5-09EDB213C323}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseModel", "DatabaseModel\DatabaseModel.csproj", "{039C1A38-76C3-4367-85E5-09EDB213C323}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AngularClient", "AngularClient\AngularClient.csproj", "{C024CAFF-5BC8-40CD-BEB0-5243A88D088C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AngularClient", "AngularClient\AngularClient.csproj", "{C024CAFF-5BC8-40CD-BEB0-5243A88D088C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exchange.Common", "Exchange.Common\Exchange.Common.csproj", "{A0062A66-E544-46E9-8713-BC866B12D539}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Exchange.Common", "Exchange.Common\Exchange.Common.csproj", "{A0062A66-E544-46E9-8713-BC866B12D539}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exchange.Web", "Exchange.Web\Exchange.Web.csproj", "{E9929632-A9E0-4BB8-935E-5CDC49C6EA64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Exchange.Web", "Exchange.Web\Exchange.Web.csproj", "{E9929632-A9E0-4BB8-935E-5CDC49C6EA64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exchange.Authentication", "Exchange.Authentication\Exchange.Authentication.csproj", "{30E1BDDF-BAEF-4D92-84F3-35B163EAB20D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Exchange.Authentication", "Exchange.Authentication\Exchange.Authentication.csproj", "{30E1BDDF-BAEF-4D92-84F3-35B163EAB20D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exchange.Core", "Exchange.Core\Exchange.Core.csproj", "{A8E6750E-054C-40D8-9A58-202DCCBD443C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Exchange.Core", "Exchange.Core\Exchange.Core.csproj", "{A8E6750E-054C-40D8-9A58-202DCCBD443C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

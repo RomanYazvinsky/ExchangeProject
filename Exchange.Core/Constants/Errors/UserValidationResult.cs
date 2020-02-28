@@ -1,11 +1,10 @@
 ﻿namespace Exchange.Core.Constants.Errors
 {
-    public enum AuthValidationResult
+    public enum UserValidationResult
     {
         Ok,
         UserNotFound,
         InvalidPassword,
-        DeviceAuthRemoved,
         InvalidRefreshToken,
         ExpiredRefreshToken
     }

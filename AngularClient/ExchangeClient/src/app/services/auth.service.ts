@@ -4,15 +4,15 @@ import {Router} from '@angular/router';
 import {BehaviorSubject, EMPTY, Observable, of} from 'rxjs';
 import {catchError, filter, finalize, first, map, switchMap, tap} from 'rxjs/operators';
 import {AuthDto} from '../models/auth-dto';
-import {UserDto} from '../models/user.dto';
+import {User} from '../models/user';
 import {Base64Converter} from '../Utils/base64.converter';
 
 @Injectable()
 export class AuthService {
   private readonly _authentication$: BehaviorSubject<AuthDto | null>
     = new BehaviorSubject<AuthDto | null>(null);
-  private readonly _currentUser$: BehaviorSubject<UserDto | null>
-    = new BehaviorSubject<UserDto | null>(null);
+  private readonly _currentUser$: BehaviorSubject<User | null>
+    = new BehaviorSubject<User | null>(null);
   private _isAuthBlocked: boolean = false;
   private _expiration: Date | null = null;
 
@@ -56,13 +56,13 @@ export class AuthService {
         first(),
         switchMap(auth => {
           return !!auth
-            ? this.http.get<UserDto | null>('/api/currentUser')
+            ? this.http.get<User | null>('/api/currentUser')
             : EMPTY;
         })).subscribe(user => this.setCurrentUser(user));
     });
   }
 
-  private setCurrentUser(user: UserDto | null) {
+  private setCurrentUser(user: User | null) {
     this._currentUser$.next(user);
   }
 
@@ -72,7 +72,7 @@ export class AuthService {
       this.setCurrentUser(null);
       return;
     }
-    this.http.get<UserDto | null>('/api/currentUser').subscribe(user => this.setCurrentUser(user))
+    this.http.get<User | null>('/api/currentUser').subscribe(user => this.setCurrentUser(user))
   }
 
   constructor(private http: HttpClient, private router: Router) {
@@ -123,7 +123,7 @@ export class AuthService {
     return this._authentication$.getValue();
   }
 
-  get currentUser$(): Observable<UserDto | null> {
+  get currentUser$(): Observable<User | null> {
     return this._currentUser$;
   }
 

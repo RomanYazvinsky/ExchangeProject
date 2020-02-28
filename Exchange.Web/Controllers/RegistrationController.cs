@@ -2,10 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Exchange.Core.Constants.Errors;
-using Exchange.Core.Models.Dto;
 using Exchange.Core.Models.Dto.Validation;
 using Exchange.Core.Services;
-using Exchange.Core.Services.ErrorMessages;
 using Exchange.Core.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,15 +16,15 @@ namespace Exchange.Web.Controllers
     public class RegistrationController : ControllerBase
     {
         private readonly ILogger<RegistrationController> _logger;
-        private readonly UserRegistrationService _userRegistrationService;
-        private readonly CredentialValidationService _credentialValidationService;
-        private readonly ErrorMessageService _ems;
+        private readonly IUserRegistrationService _userRegistrationService;
+        private readonly ICredentialValidationService _credentialValidationService;
+        private readonly IErrorMessageService _ems;
 
         public RegistrationController(
             ILogger<RegistrationController> logger,
-            UserRegistrationService userRegistrationService,
-            CredentialValidationService credentialValidationService,
-            ErrorMessageService ems
+            IUserRegistrationService userRegistrationService,
+            ICredentialValidationService credentialValidationService,
+            IErrorMessageService ems
         )
         {
             _logger = logger;
@@ -63,11 +61,16 @@ namespace Exchange.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> RegisterAsync(UserRegistrationVm registrationVm)
         {
-            var user = await _userRegistrationService.RegisterUser(
+            var (user, errorMessages) = await _userRegistrationService.RegisterUser(
                 registrationVm.Username,
                 registrationVm.Password,
-                registrationVm.Email);
-            var mailError = await _userRegistrationService.SendConfirmationEmail(user);
+                registrationVm.Email
+            );
+            if (user == default)
+            {
+                return BadRequest(errorMessages.ToDictionary(pair => pair.Key.ToString(), pair => pair.Value));
+            }
+            var mailError = _userRegistrationService.SendConfirmationEmail(user);
             if (mailError != MailConfirmationResult.Ok && mailError != MailConfirmationResult.AlreadyConfirmed)
             {
                 return BadRequest(_ems.GetErrorMessage(mailError));

@@ -1,14 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json.Serialization;
-using Exchange.Authentication;
 using Exchange.Authentication.Jwt;
 using Exchange.Authentication.Jwt.Impl;
 using Exchange.Configuration;
 using Exchange.Core.Constants;
 using Exchange.Core.Services;
-using Exchange.Core.Services.EmailConfirmation;
-using Exchange.Core.Services.EmailConfirmation.Options;
-using Exchange.Core.Services.ErrorMessages;
+using Exchange.Core.Services.Impl;
+using Exchange.Core.Services.Impl.EmailConfirmation;
+using Exchange.Core.Services.Impl.ErrorMessages;
+using Exchange.Core.Services.Options;
 using Exchange.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,13 +39,13 @@ namespace Exchange
             });
             services.SetJwtAuthenticationAsDefault().AddJwtAuthorization(jwtSettings);
             services.AddSingleton<JwtSecurityTokenHandler>();
-            services.AddSingleton<ErrorMessageService>();
-            services.AddSingleton<EmailService>();
-            services.AddScoped<CredentialValidationService>();
-            services.AddScoped<UserRegistrationService>();
+            services.AddSingleton<IErrorMessageService, ErrorMessageService>();
+            services.AddSingleton<IEmailService, EmailService>();
+            services.AddScoped<ICredentialValidationService, CredentialValidationService>();
+            services.AddScoped<IUserRegistrationService, UserRegistrationService>();
             services.AddScoped<IAuthService, JwtAuthService>();
-            services.AddScoped<UserService>();
-
+            services.AddScoped<IUserService, UserService>();
+            services.AddHostedService<EmailSenderService>();
             services.AddCors(options =>
                 options.AddPolicy(AuthenticationConstants.CorsPolicyName,
                     builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));

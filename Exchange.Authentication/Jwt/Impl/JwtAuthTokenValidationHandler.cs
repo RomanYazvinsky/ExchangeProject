@@ -4,7 +4,7 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Exchange.Authentication.Jwt.Models;
 using Exchange.Core.Constants;
-using Exchange.Core.Services.ErrorMessages;
+using Exchange.Core.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,11 +14,11 @@ namespace Exchange.Authentication.Jwt.Impl
 {
     public class JwtAuthTokenValidationHandler : AuthenticationHandler<JwtOptions>
     {
-        private readonly ErrorMessageService _ems;
+        private readonly IErrorMessageService _ems;
         private readonly ITokenValidator _tokenValidator;
 
         public JwtAuthTokenValidationHandler(
-            ErrorMessageService ems,
+            IErrorMessageService ems,
             IOptionsMonitor<JwtOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,

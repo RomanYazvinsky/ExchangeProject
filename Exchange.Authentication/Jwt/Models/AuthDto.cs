@@ -6,6 +6,6 @@ namespace Exchange.Authentication.Jwt.Models
     public class AuthDto
     {
         public AuthVm? Auth { get; set; }
-        public AuthValidationResult Result { get; set; } = AuthValidationResult.Ok;
+        public UserValidationResult Result { get; set; } = UserValidationResult.Ok;
     }
 }
